@@ -32,6 +32,7 @@ INPUT=$?
             ;;
         *)
             echo “Wrong input: $INPUT. Try again.”
+            _hold
             ;;
     esac
 done
@@ -102,6 +103,7 @@ _user() {
                 ;;
             *)
                 echo “Wrong input. Try again.
+                _hold
         esac                
     done
 }
@@ -178,8 +180,9 @@ _user_attributes_list() {
         
         # Ger för tillfället en \n separerad lista på grupper, detta borde ändras till att separeras med kommatecken
         # Kan möjligtvis bytas ut mot att kalla _group_list istället sen
-        # Denna rad fungerar i terminalen med ej i scriptet!!! Förmodligen för att det hamnar på flera rader
-        GROUPS=`cat /etc/group | grep $USERNAME | head -n -1 | awk -F ":" '{print $1}'`
+
+        #eval GROUPS=`cat /etc/group | grep $USERNAME | awk -F ":" '{print $1}'`
+        GROUPS=`groups $USERNAME | cut -d " " -f 3-`
 
         echo -e "\n1. Username: $USERNAME" 
         echo "2. User ID: $USERID"
@@ -254,30 +257,60 @@ _group() {
         case $INPUT in
             1) 
                 _group_list
+                _hold
                 ;;
             2)
                 _group_create
+                _hold
                 ;;
             3)
                 _group_remove
+                _hold
                 ;;
             4)
-                _group_list_user
+                _group_list_users_in_specific_group
+                _hold
                 ;;
             5)
                 _group_add_user
+                _hold
                 ;;
             6)
                 _group_remove_user
+                _hold
                 ;;
             7)
                 CONTINUE=0
                 ;;
             *)
                 echo “Wrong input. Try again”
+                _hold
                 ;;
         esac
     done
+}
+_group_list() {
+    echo “Listing groups.. “
+    echo -e "(Please wait)\n"
+    MIN=`cat /etc/login.defs | grep GID_MIN | awk '{print $2}' | head -1`
+    MAX=`cat /etc/login.defs | grep GID_MAX | awk '{print $2}' | head -1`
+    eval getent group {$MIN..$MAX} | awk -F ":" '{print $1}'
+}
+_group_create() {
+    echo "Enter name of group"
+    echo -en "\nChoice >"
+    read NAME
+    eval addgroup $NAME
+    RETVAL=$?
+    if [[ $RETVAL -eq 0 ]]
+    then
+        echo "Group $NAME has been created!"
+    elif [[ $RETVAL -eq 1 ]]
+    then
+        echo "Group $NAME already exists."
+    else
+        echo "Failed to create group."
+    fi
 }
 _folder() {
     CONTINUE=1
@@ -288,24 +321,30 @@ _folder() {
         case $INPUT in
             1) 
                 _folder_list
+                _hold
                 ;;
             2)
                 _folder_create
+                _hold
                 ;;
             3)
                 _folder_remove
+                _hold
                 ;;
             4)
                 _folder_attribute_list
+                _hold
                 ;;
             5)
                 _folder_attribute_change
+                _hold
                 ;;
             6)
                 CONTINUE=0
                 ;;
             *)
                 echo “Wrong input. Try again”
+                _hold
                 ;;
         esac
     done
