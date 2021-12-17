@@ -3,7 +3,7 @@
 #Check if run as root
 if [[ `id -u` -ne 0 ]]
 then
-    echo “Please use sudo: “sudo <command_name>””
+    echo "Please run the command with sudo."
     exit
 fi
 
@@ -107,12 +107,12 @@ _user() {
 }
 _user_list() {
     echo “Listing users.. “
-    
+    echo -e "(Please wait)\n"
     # Hitta vilken range UID som används för login-användare
-    MIN=`cat /etc/login.defs | grep UID_MIN | awk ‘{print $2}’ | head -1`
-    MAX=`cat /etc/login.defs | grep UID_MAX | awk ‘{print $2}’ | head -1`
+    MIN=`cat /etc/login.defs | grep UID_MIN | awk '{print $2}' | head -1`
+    MAX=`cat /etc/login.defs | grep UID_MAX | awk '{print $2}' | head -1`
 
-    getent passwd {$MIN..$MAX} | awk -F “:” ‘{print $1}’
+    eval getent passwd {$MIN..$MAX} | cut -d: -f1 
 }
 _user_create() {
     echo "Enter full name of user: "
@@ -129,10 +129,10 @@ _user_create() {
     
     useradd $USERNAME -c $FULLNAME -md /home/$USERNAME -s /bin/bash -p $PASSWORD
     RETVAL=$?
-    if [[ $RETVAL -eq 0]]
+    if [[ $RETVAL -eq 0 ]]
     then
         echo "User $USERNAME successfully created!"
-    elif [[ $RETVAL -eq 9]]
+    elif [[ $RETVAL -eq 9 ]]
     then
         echo "User $USERNAME already exists!"
     else
@@ -251,7 +251,7 @@ _group() {
         _group_menu
         INPUT=$?
         
-        case $INPUT IN
+        case $INPUT in
             1) 
                 _group_list
                 ;;
@@ -353,23 +353,23 @@ _network_pcname() {
     _hold
 }
 _network_interface_name() {
-    INTERFACES=`ip link show | awk ‘{print $2}’ | awk ‘NR%2==1’ | sed “s/:/ /g” | awk ‘NR!=1’`
+    INTERFACES=`ip link show | awk '{print $2}' | awk 'NR%2==1' | sed “s/:/ /g” | awk 'NR!=1'`
     echo -e “Your network interfaces are:\n$INTERFACES”
     _hold
 }
 _network_ip() {
     
-    IPADDRESS=`hostname -I | awk ‘{print $1}’`
+    IPADDRESS=`hostname -I | awk '{print $1}'`
     echo “IP-address: $IPADDRESS”
     _hold
 }
 _network_mac() {
-    MACADDRESS=`ip link show | egrep “link/ether” | awk ‘{print $2}’`
+    MACADDRESS=`ip link show | egrep “link/ether” | awk '{print $2}'`
     echo “MAC-address: $MACADDRESS”
     _hold
 }
 _network_gateway() {
-    GATEWAY=`ip route | grep default | awk ‘{print $3}’`
+    GATEWAY=`ip route | grep default | awk '{print $3}'`
     echo  “Gateway: $GATEWAY”
     _hold
 }
@@ -377,11 +377,11 @@ _network_status() {
     CONTINUE=1
     while [[ CONTINUE -eq 1 ]]
     do
-        echo -e “Which network interface do you want to see the status of?\n(Enter [1] to list all networks.\n)
+        echo -e "Which network interface do you want to see the status of?\n(Enter [1] to list all networks.\n)"
         echo -n “Choice: “
         read INPUT
         
-        if [[ $INPUT -eq 1]]
+        if [[ $INPUT -eq 1 ]]
         then
             _name_interface_name
             _hold
@@ -390,7 +390,7 @@ _network_status() {
         fi
     done
     
-    STATUS=`ip link show $INPUT | awk ‘{print $9}’ | head -1`
+    STATUS=`ip link show $INPUT | awk '{print $9}' | head -1`
     if [[ $STATUS == “UP” ]]
     then
         echo “$INPUT is up!”
@@ -398,7 +398,7 @@ _network_status() {
     then
         echo “$INPUT is down!”
     else
-        echo “Can’t find network.”
+        echo "Can't find network."
     fi
     _hold
 }
