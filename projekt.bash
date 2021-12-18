@@ -316,13 +316,15 @@ _group_remove() {
     echo "Enter name of group:"
     echo -en "\nChoice >"
     read NAME
-    GROUPID=`getent group $NAME | awk -F ":" '{print $3}'`
+    getent group $NAME &> /dev/null
     RETVAL=$?
     if [[ $RETVAL -eq 2 ]]
     then
         echo "Can't find group."
         return
     fi
+
+    GROUPID=`getent group $NAME | awk -F ":" '{print $3}'`
     MIN=`cat /etc/login.defs | grep GID_MIN | awk '{print $2}' | head -1`
     MAX=`cat /etc/login.defs | grep GID_MAX | awk '{print $2}' | head -1`
 
@@ -350,6 +352,30 @@ _group_remove() {
         fi
     else
         echo "$NAME is a systemgroup. It cannot be deleted through this program."
+}
+_group_list_users_in_specific_group() {
+    echo "Enter name of group:"
+    echo -en "Choice >"
+    read NAME
+    getent group $NAME &> /dev/null
+    RETVAL=$?
+    if [[ $RETVAL -eq 2 ]]
+    then
+        echo "Can't find group."
+        return
+    fi
+
+    USERS=`getent group $NAME | awk -F ":" '{print $4}'`
+
+    # Testar om gruppen är en primärgrupp
+    getent passwd $NAME $> /dev/null
+    RETVAL=$?
+    if [[ $RETVAL -eq 0 ]]
+    then
+        USERS="$NAME, $USERS"
+    fi
+
+    echo "Group members: $USERS"
 }
 _folder() {
     CONTINUE=1
