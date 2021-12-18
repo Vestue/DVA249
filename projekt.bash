@@ -297,7 +297,7 @@ _group_list() {
     eval getent group {$MIN..$MAX} | awk -F ":" '{print $1}'
 }
 _group_create() {
-    echo "Enter name of group"
+    echo "Enter name of group:"
     echo -en "\nChoice >"
     read NAME
     eval addgroup $NAME
@@ -311,6 +311,45 @@ _group_create() {
     else
         echo "Failed to create group."
     fi
+}
+_group_remove() {
+    echo "Enter name of group:"
+    echo -en "\nChoice >"
+    read NAME
+    GROUPID=`getent group $NAME | awk -F ":" '{print $3}'`
+    RETVAL=$?
+    if [[ $RETVAL -eq 2 ]]
+    then
+        echo "Can't find group."
+        return
+    fi
+    MIN=`cat /etc/login.defs | grep GID_MIN | awk '{print $2}' | head -1`
+    MAX=`cat /etc/login.defs | grep GID_MAX | awk '{print $2}' | head -1`
+
+    # Om gruppen är inom intervallet för användargrupper
+    if [[ $GROUPID -ge $MIN -a $GROUPID -le $MAX ]]
+    then
+        groupdel $NAME &> /dev/null
+        RETVAL=$?
+        if [[ $RETVAL -eq 8 ]]
+        then
+            echo "The group is a primary group."
+            echo "Are you sure you want to delete it?"
+            echo "Enter [y] to confirm."
+            echo -en "Choice >"
+            read INPUT
+            if [[ $INPUT == "y" ]]
+            then
+                groupdel -f $NAME
+                echo "Primary group $NAME has been deleted."
+            else
+                echo "Exiting.. "
+            fi
+        else
+            echo "Group $NAME has been deleted."
+        fi
+    else
+        echo "$NAME is a systemgroup. It cannot be deleted through this program."
 }
 _folder() {
     CONTINUE=1
