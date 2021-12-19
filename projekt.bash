@@ -8,60 +8,102 @@ then
 fi
 
 _main() {
+    RED=`tput setaf 1`
+    GREEN=`tput setaf 2`
+    BLUE=`tput setaf 4`
+    YELLOW=`tput setaf 6`
+    reset=`tput sgr0`
+    end='0'
+
     CONTINUE=1
-while [[ $CONTINUE -eq 1 ]]
-do
-_main_menu
-INPUT=$?
-    case $INPUT in
-        1)
-            _user
-            ;;
-        2)
-            _group
-            ;;
-        3)
-            _folder
-            ;;
-        4)
-            _network
-            ;;
-        5)
-            echo “Exiting…”
-            CONTINUE=0
-            ;;
-        *)
-            echo “Wrong input: $INPUT. Try again.”
-            _hold
-            ;;
-    esac
-done
+    while [[ $CONTINUE -eq 1 ]]
+    do
+    _main_menu
+    INPUT=$?
+        case $INPUT in
+            1)
+                _user
+                ;;
+            3)
+                _group
+                ;;
+            2)
+                _directory
+                ;;
+            4)
+                _network
+                ;;
+            5)
+                echo “Exiting…”
+                CONTINUE=0
+                ;;
+            *)
+                echo “Wrong input: $INPUT. Try again.”
+                _hold
+                ;;
+        esac
+    done
 }
 _main_menu() {
-    echo “¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤”
-echo “                                System Manager 3000”
-echo -e “¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤\n”
+    echo "******************************************************"
+    echo "--------------------SYSTEM MANAGER--------------------"
 
-read INPUT
-return $INPUT
-}
-_user_menu() {
-    echo MENU
-    
+    echo "${RED}(1)${reset} Users"
+    echo ""
+    echo "${GREEN}(2)${reset} Directories"
+    echo
+    echo "${BLUE}(3)${reset} Groups"
+    echo
+    echo "${YELLOW}(4)${reset} Network"
+    echo
+    echo "(5) Exit"
+    echo
+    echo -n "Choice: "
+
     read INPUT
     return $INPUT
 }
-_group_menu() {
-    echo MENU
+_user_menu() {
+    echo "************************************************* "
+    echo "--------------------USER MENU--------------------"
 
+    echo "${RED}ua${reset} - User Add       (Create a new user)"
+    echo "${RED}ul${reset} - User List      (List all login users"
+    echo "${RED}uv${reset} - User View      (View user properties"
+    echo "${RED}um${reset} - User Modify    (Modify user properties)"
+    echo "${RED}ud${reset} - User Delete    (Delete a login user)"
+    echo "${RED}0${reset}  - Exit           (Exit back to main menu)"
+    echo -n "Choice: "
+    
     read INPUT
-    RETURN $INPUT
 }
-_folder_menu() {
-    echo MENU
+_group_menu() {
+    echo "***************************************************"
+    echo "--------------------GROUPS MENU--------------------"
+
+    echo "${BLUE}ga${reset} - Group Add     (Adds a new group)"
+    echo "${BLUE}gl${reset} - Group List    (List all groups (Non system))"
+    echo "${BLUE}gv${reset} - Group View    (Lists all users in a group)"
+    echo "${BLUE}gm${reset} - Group Modify  (Add/remove user from a group)"
+    echo "${BLUE}gd${reset} - Group delete  (Delete a group)"
+    echo "${BLUE}0${reset}  - Exit          (Exit back to the main menu)"
+    echo -n "Choice: "
 
     read INPUT
-    RETURN $INPUT
+}
+_directory_menu() {
+    echo "******************************************************"
+    echo "--------------------DIRECTORY MENU--------------------"
+
+    echo "${GREEN}da${reset} - Directory Add      (Creates a new directory)"
+    echo "${GREEN}dl${reset} - Directory List     (Lists all content inside of directory)" 
+    echo "${GREEN}dv${reset} - Directory View     (View directory properties)"
+    echo "${GREEN}dm${reset} - Directory Modify   (Modify directory properties)" 
+    echo "${GREEN}dd${reset} - Directory Delete   (Delete a directory)"
+    echo "${GREEN}0${reset}  - Exit               (Exit back to the main menu)"
+    echo -n "Choice: "
+
+    read INPUT
 }
 _network_menu() {
     echo MENU
@@ -70,40 +112,43 @@ _network_menu() {
     return $INPUT
 }
 _user() {
-    CONTINUE=1
-    while [[ $CONTINUE -eq 1 ]]
+    RUNUSR=1
+    while [[ $RUNUSR -eq 1 ]]
     do
+        INPUT=''
         _user_menu
-        INPUT=$?
+        
     
         case $INPUT in
-            1)
+            ul)
                 _user_list
                 _hold
                 ;;
-            2)
+            ua)
                 _user_create
                 _hold
                 ;;
-            3)
+            ud)
                 _user_remove
                 _hold
                 ;;
-            4)
+            uv)
+                PLACEHOLD=''
                 echo "Which user do you want to see the properties of?"
-                _user_attributes_list
+                _user_attributes_list PLACEHOLD
                 _hold
                 ;;
-            5)
+            um)
                 _user_attributes_change
                 _hold
                 ;;
-            6)
-                CONTINUE=0
+            0)
+                RUNUSR=0
                 ;;
             *)
                 echo “Wrong input. Try again.
                 _hold
+                ;;
         esac                
     done
 }
@@ -163,7 +208,7 @@ _user_attributes_list() {
     echo -n "Choice >"
     read USERNAME
 
-    if [[ $USERNAME -eq 0 ]]
+    if [[ $USERNAME == 0 ]]
     then
         return  1
     fi
@@ -194,12 +239,12 @@ _user_attributes_list() {
     else
         echo "Can't find user!"
     fi
-    return $USERNAME
+    eval "$1=$USERNAME"
 }
 _user_attributes_change() {
     echo "Which user do you want to modify the properties of?"
-    _user_attributes_list
-    USERNAME=$?
+    USERNAME=''
+    _user_attributes_list USERNAME
     if [[ $USERNAME -eq 1 ]]
     then
         return  1
@@ -255,39 +300,34 @@ _user_ask_which() {
     echo -en "Choice >"
 }
 _group() {
-    CONTINUE=1
-    while [[ $CONTINUE -eq 1 ]]
+    RUNGRP=1
+    while [[ $RUNGRP -eq 1 ]]
     do
         _group_menu
-        INPUT=$?
-        
         case $INPUT in
-            1) 
+            gl) 
                 _group_list
                 _hold
                 ;;
-            2)
+            ga)
                 _group_create
                 _hold
                 ;;
-            3)
+            gd)
                 _group_remove
                 _hold
                 ;;
-            4)
+            gv)
                 _group_list_users_in_specific_group
                 _hold
                 ;;
-            5)
-                _group_add_user
+            gm)
+                _group_modify
                 _hold
                 ;;
-            6)
-                _group_remove_user
-                _hold
-                ;;
-            7)
-                CONTINUE=0
+            0)
+                echo "Exiting.."
+                RUNGRP=0
                 ;;
             *)
                 echo “Wrong input. Try again”
@@ -334,7 +374,7 @@ _group_remove() {
     MAX=`cat /etc/login.defs | grep GID_MAX | awk '{print $2}' | head -1`
 
     # Om gruppen är inom intervallet för användargrupper
-    if [[ $GROUPID -ge $MIN -a $GROUPID -le $MAX ]]
+    if [[ $GROUPID -ge $MIN && $GROUPID -le $MAX ]]
     then
         groupdel $NAME &> /dev/null
         RETVAL=$?
@@ -357,6 +397,7 @@ _group_remove() {
         fi
     else
         echo "$NAME is a systemgroup. It cannot be deleted through this program."
+    fi
 }
 _group_list_users_in_specific_group() {
     _group_ask_which
@@ -380,6 +421,34 @@ _group_list_users_in_specific_group() {
     fi
 
     echo "Group members: $USERS"
+}
+_group_modify() {
+    CONTINUE=1
+    while [[ $CONTINUE -eq 1 ]]
+    do
+        echo "Do you want to add or remove a user?"
+        echo "1. Add user"
+        echo "2. Remove user"
+        _askif_exit
+        echo -n "Choice: "
+        read INPUT
+
+        case $INPUT in
+            1)
+                _group_add_user
+                ;;
+            2)
+                _group_remove_user
+                ;;
+            0)
+                echo "Exiting.."
+                CONTINUE=0
+                ;;
+            *)
+                echo "Invalid input. Try again."
+                ;;
+        esac
+    done
 }
 _group_add_user() {
     echo 'Which group do you want to add a user to?'
@@ -437,35 +506,34 @@ _group_ask_which() {
     echo 'Enter name of group:'
     echo -en 'Choice >'
 }
-_folder() {
-    CONTINUE=1
-    while [[ $CONTINUE -eq 1 ]]
+_directory() {
+    RUNDIR=1
+    while [[ $RUNDIR -eq 1 ]]
     do
-        _folder_menu
-        INPUT=$?
+        _directory_menu
         case $INPUT in
-            1) 
-                _folder_list
+            da) 
+                _directory_add
                 _hold
                 ;;
-            2)
-                _folder_create
+            dl)
+                _directory_list
                 _hold
                 ;;
-            3)
-                _folder_remove
+            dv)
+                _directory_view
                 _hold
                 ;;
-            4)
-                _folder_attribute_list
+            dm)
+                _directory_modify
                 _hold
                 ;;
-            5)
-                _folder_attribute_change
+            dd)
+                _directory_delete
                 _hold
                 ;;
-            6)
-                CONTINUE=0
+            0)
+                RUNDIR=0
                 ;;
             *)
                 echo “Wrong input. Try again”
@@ -474,12 +542,26 @@ _folder() {
         esac
     done
 }
+_directory_add() {
+    echo "Directory add"
+}
+_directory_list() {
+    echo "Directory list"
+}
+_directory_view() {
+    echo "Directory view"
+}
+_directory_modify() {
+    echo "Directory modify"
+}
+_directory_delete() {
+    echo "Directory delete"
+}
 _network() {
     CONTINUE=1
     while [[ $CONTINUE -eq 1 ]]
     do
         _network_menu
-        INPUT=$?
         case $INPUT in
             1)
                 _network_pcname
@@ -568,8 +650,8 @@ _network_status() {
 }
 _hold() {
     #Wait for user input before continuing to next step
-    echo "---------------------------------------------"
-    echo -en “Press any key to continue..”
+    echo "-------------------------------------------------"
+    echo -en 'Press any key to continue..'
     read -sn1
 }
 _askif_exit() {
