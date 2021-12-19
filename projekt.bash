@@ -142,7 +142,7 @@ _user_create() {
     fi
 }
 _user_remove() {
-    echo "Enter username:"
+    _user_ask_which
     read USERNAME
 
     userdel -r $USERNAME
@@ -218,34 +218,41 @@ _user_attributes_change() {
             usermod -l $NEWDATA $USERNAME
             # Döper om hemdirectoriet, detta kan möjligtvis behövas ändras 
             mv /home/$USERNAME /home/$NEWDATA
-            echo "Field has been successfully changed!"
+            _user_attribute_success
             ;;
         2)
             usermod -u $NEWDATA $USERNAME
-            echo "Field has been successfully changed!"
+            _user_attribute_success
             ;;
         3)
             groupmod -g $NEWDATA $USERNAME
-            echo "Field has been successfully changed!"
+            _user_attribute_success
             ;;
         4)
             usermod -c $NEWDATA $USERNAME
-            echo "Field has been successfully changed!"
+            _user_attribute_success
             ;;
         5)
             usermod -md $NEWDATA $USERNAME
-            echo "Field has been successfully changed!"
+            _user_attribute_success
             ;;
         6)
             usermod -s $NEWDATA $USERNAME
-            echo "Field has been successfully changed!"
+            _user_attribute_success
             ;;
         0)
             return 1
             ;;
         *)
-            echo "Invalid option."
+            echo 'Invalid option.'
     esac
+}
+_user_attribute_success() {
+    echo 'Field has been successfully changed!'
+}
+_user_ask_which() {
+    echo 'Enter username:'
+    echo -en "Choice >"
 }
 _group() {
     CONTINUE=1
@@ -297,8 +304,7 @@ _group_list() {
     eval getent group {$MIN..$MAX} | awk -F ":" '{print $1}'
 }
 _group_create() {
-    echo "Enter name of group:"
-    echo -en "\nChoice >"
+    _group_ask_which
     read NAME
     eval addgroup $NAME
     RETVAL=$?
@@ -309,12 +315,11 @@ _group_create() {
     then
         echo "Group $NAME already exists."
     else
-        echo "Failed to create group."
+        echo 'Failed to create group.'
     fi
 }
 _group_remove() {
-    echo "Enter name of group:"
-    echo -en "\nChoice >"
+    _group_ask_which
     read NAME
     getent group $NAME &> /dev/null
     RETVAL=$?
@@ -345,7 +350,7 @@ _group_remove() {
                 groupdel -f $NAME
                 echo "Primary group $NAME has been deleted."
             else
-                echo "Exiting.. "
+                echo 'Exiting.. '
             fi
         else
             echo "Group $NAME has been deleted."
@@ -354,8 +359,7 @@ _group_remove() {
         echo "$NAME is a systemgroup. It cannot be deleted through this program."
 }
 _group_list_users_in_specific_group() {
-    echo "Enter name of group:"
-    echo -en "Choice >"
+    _group_ask_which
     read NAME
     getent group $NAME &> /dev/null
     RETVAL=$?
@@ -376,6 +380,62 @@ _group_list_users_in_specific_group() {
     fi
 
     echo "Group members: $USERS"
+}
+_group_add_user() {
+    echo 'Which group do you want to add a user to?'
+    _group_ask_which
+    read GROUPNAME
+    getent group $GROUPNAME $> /dev/null
+    RETVAL=$?
+    if [[ $RETVAL -ne 0 ]]
+    then
+        echo "Can't find group. Try again."
+        return
+    fi
+
+    echo -e "\nWhich user do you want to add to the group?"
+    _user_ask_which
+    read USERNAME
+    getent passwd $USERNAME $> /dev/null
+    RETVAL=$?
+    if [[ $RETVAL -ne 0 ]]
+    then
+        echo "Can't find user. Try again."
+        return
+    fi
+
+    adduser $USERNAME $GROUPNAME
+    echo "$USERNAME has been added to $GROUPNAME!"
+}
+_group_remove_user() {
+    echo 'Which group do you want to remove a user from?'
+    _group_ask_which
+    read GROUPNAME
+    getent group $GROUPNAME $> /dev/null
+    RETVAL=$?
+    if [[ $RETVAL -ne 0 ]]
+    then
+        echo "Can't find group. Try again."
+        return
+    fi
+
+    echo -e "\nWhich user do you want to remove from the group?"
+    _user_ask_which
+    read USERNAME
+    getent passwd $USERNAME $> /dev/null
+    RETVAL=$?
+    if [[ $RETVAL -ne 0 ]]
+    then
+        echo "Can't find user. Try again."
+        return
+    fi
+
+    deluser $USERNAME $GROUPNAME
+    echo "$USERNAME has been removed from $GROUPNAME!"
+}
+_group_ask_which() {
+    echo 'Enter name of group:'
+    echo -en 'Choice >'
 }
 _folder() {
     CONTINUE=1
