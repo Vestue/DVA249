@@ -34,7 +34,7 @@ _main() {
                 _directory
                 ;;
             4)
-                _network
+                _network_menu
                 ;;
             0)
                 echo “Exiting…”
@@ -115,7 +115,7 @@ _user_menu() {
     echo "${RED}3${reset} - User View      (View user properties"
     echo "${RED}4${reset} - User Modify    (Modify user properties)"
     echo "${RED}5${reset} - User Delete    (Delete a login user)"
-    echo "${RED}0${reset}  - Exit           (Exit back to main menu)"
+    echo "${RED}0${reset} - Exit           (Exit back to main menu)"
     _hold
 }
 _user_create() {
@@ -562,8 +562,8 @@ _group_ask_which() {
 ####################
 
 _network() {
-    CONTINUE=1
-    while [[ $CONTINUE -eq 1 ]]
+    RUNNET=1
+    while [[ $RUNNET -eq 1 ]]
     do
         _network_menu
         case $INPUT in
@@ -588,8 +588,8 @@ _network() {
             6)
                 _network_status
                 ;;
-            7)
-                CONTINUE=0
+            0)
+                RUNNET=0
                 ;;
             *)
                 echo "Invalid option. Try again"
@@ -598,15 +598,47 @@ _network() {
     done
 }
 _network_menu() {
-    echo MENU
+    echo "************************************************* "
+    echo "------------------NETWORK MENU-------------------"
 
+    echo -en "${RED}Computer name: ${reset}"
+    _network_pcname
+    _network_interfaces
     _hold
 }
 _network_pcname() {
     NAME=`hostname`
-    echo  “Name of computer: $NAME“
-    _hold
+    echo -e  "$NAME\n"
 }
+_network_interfaces() {
+    # Läs in alla interfaces förutom loopback, lo
+    INTERFACES=`ip link show | awk '{print $2}' | awk 'NR%2==1' | sed 's/:/ /g' | awk 'NR!=1'`
+    i=0
+    for interface in INTERFACES
+    do
+        i=$((i+1))
+        echo -ne "\n${RED}Interface: ${reset}"
+        NAME=`echo $INTERFACES | cut -d ' ' -f $i`
+        echo $NAME
+        echo -n "${RED}IP address: ${reset}"
+        ADDRESS=`ip -d addr show $NAME | grep inet | awk '{print $2}' | head -1`
+        echo $ADDRESS
+
+        echo -n "${RED}Gateway: ${reset}"
+        GATEWAY=`ip r | grep $NAME | tail -1 | awk '{print $3}'`
+        echo $GATEWAY
+
+        echo -n "${RED}MAC: ${reset}"
+        MACADDRESS=`ip -d show $NAME | grep link/ether | awk '{print $2}'`
+        echo MACADDRESS
+
+        echo -n "${RED}Status: ${reset}"
+        STATUS=`ip link show $NAME | awk '{print $9}'`
+    done
+}
+
+
+
 _network_interface_name() {
     INTERFACES=`ip link show | awk '{print $2}' | awk 'NR%2==1' | sed “s/:/ /g” | awk 'NR!=1'`
     echo -e “Your network interfaces are:\n$INTERFACES”
