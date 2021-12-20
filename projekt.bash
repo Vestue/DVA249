@@ -24,16 +24,16 @@ _main() {
     do
     _main_menu
         case $INPUT in
-            1)
+            u)
                 _user
                 ;;
-            2)
+            g)
                 _group
                 ;;
-            3)
+            d)
                 _directory
                 ;;
-            4)
+            n)
                 _network_menu
                 ;;
             0)
@@ -63,7 +63,10 @@ _main_menu() {
     echo
     _hold
 }
-
+_menu_helptext() {
+    echo "******************************************************"
+    echo "(q - Quit, b - Back)"
+}
 ######################
 #       USER        #
 ####################
@@ -107,8 +110,9 @@ _user() {
     done
 }
 _user_menu() {
-    echo "************************************************* "
-    echo "--------------------USER MENU--------------------"
+    
+    echo "******************************************************"
+    echo "----------------------USER MENU-----------------------"
 
     echo "${RED}1${reset} - User Add       (Create a new user)"
     echo "${RED}2${reset} - User List      (List all login users"
@@ -376,8 +380,8 @@ _group() {
     done
 }
 _group_menu() {
-    echo "***************************************************"
-    echo "--------------------GROUPS MENU--------------------"
+    echo "******************************************************"
+    echo "---------------------GROUPS MENU----------------------"
 
     echo "${BLUE}1${reset} - Group Add     (Adds a new group)"
     echo "${BLUE}2${reset} - Group List    (List all groups (Non system))"
@@ -598,8 +602,8 @@ _network() {
     done
 }
 _network_menu() {
-    echo "************************************************* "
-    echo "------------------NETWORK MENU-------------------"
+    echo "******************************************************"
+    echo "--------------------NETWORK MENU----------------------"
 
     echo -en "${RED}Computer name: ${reset}"
     _network_pcname
@@ -695,6 +699,20 @@ _hold() {
     echo -en 'Press any key to continue..\n\n'
     read -sn1 INPUT
 }
+_choice_single() {
+    echo "-------------------------------------------------"
+    echo "(q - Quit, b - Back)"
+    echo -en 'Enter choice: \n\n'
+    read -sn1 INPUT
+}
+_choice_multiple() {
+    echo "-------------------------------------------------"
+    echo "(q - Quit, b - Back)"
+    echo -en 'Enter choice: \n\n'
+    read INPUT
+}
+
+# DENNA SKA TAS BORT
 _askif_exit() {
     echo "(Enter [0] to exit.)"
 }
