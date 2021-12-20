@@ -103,6 +103,7 @@ _user() {
             q)
                 echo 'Exiting program.. '
                 CONTINUE=0
+                RUNUSR=0
                 ;;
             *)
                 echo 'Wrong input. Try again.'
@@ -182,12 +183,12 @@ _user_attributes_list() {
         #eval GROUPS=`cat /etc/group | grep $USERNAME | awk -F ":" '{print $1}'`
         GROUPS=`groups $USERNAME | cut -d " " -f 3-`
 
-        echo -e "\nu - Username: $USERNAME" 
-        echo "i - User ID: $USERID"
-        echo "g - Primary group ID: $GROUPID"
-        echo "c - Comment: $COMMENT"
-        echo "d - Directory: $HOMEDIR"
-        echo "s - Shell: $SHELLDIR"
+        echo -e "\n${RED}u${reset} - Username: $USERNAME" 
+        echo "${RED}i${reset} - User ID: $USERID"
+        echo "${RED}g${reset} - Primary group ID: $GROUPID"
+        echo "${RED}c${reset} - Comment: $COMMENT"
+        echo "${RED}d${reset} - Directory: $HOMEDIR"
+        echo "${RED}s${reset} - Shell: $SHELLDIR"
         echo -e "\n. Groups: $GROUPS"
     else
         echo "Can't find user!"
@@ -243,6 +244,7 @@ _user_attributes_change() {
         q)
             echo 'Exiting program..'
             CONTINUE=0
+            return 2
             ;;
         *)
             echo 'Invalid option.'
@@ -310,6 +312,7 @@ _directory() {
             q)
                 echo 'Exiting program…'
                 CONTINUE=0
+                RUNDIR=0
                 ;;
             *)
                 echo 'Wrong input. Try again'
@@ -381,6 +384,7 @@ _group() {
             q)
                 echo “Exiting…”
                 CONTINUE=0
+                RUNGRP=0
                 ;;
             *)
                 echo “Wrong input. Try again”
