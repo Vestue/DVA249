@@ -3,7 +3,7 @@
 #Check if run as root
 if [[ `id -u` -ne 0 ]]
 then
-    echo "Please run the command with sudo."
+    echo 'Please run the command with sudo.'
     exit
 fi
 
@@ -36,8 +36,12 @@ _main() {
             n)
                 _network_menu
                 ;;
-            0)
-                echo “Exiting…”
+            b)
+                echo 'Exiting program… '
+                CONTINUE=0
+                ;;
+            q)
+                echo 'Exiting…'
                 CONTINUE=0
                 ;;
             *)
@@ -50,23 +54,17 @@ _main() {
 _main_menu() {
     echo "******************************************************"
     echo "--------------------SYSTEM MANAGER--------------------"
-
-    echo "${RED}1${reset} Users"
+    echo "${RED}u${reset} Users"
     echo ""
-    echo "${GREEN}2${reset} Directories"
+    echo "${GREEN}d${reset} Directories"
     echo
-    echo "${BLUE}3${reset} Groups"
+    echo "${BLUE}g${reset} Groups"
     echo
-    echo "${YELLOW}4${reset} Network"
+    echo "${YELLOW}n${reset} Network"
     echo
-    echo "0 Exit"
-    echo
-    _hold
+    _choice_single
 }
-_menu_helptext() {
-    echo "******************************************************"
-    echo "(q - Quit, b - Back)"
-}
+
 ######################
 #       USER        #
 ####################
@@ -77,62 +75,64 @@ _user() {
     do
         _user_menu
         case $INPUT in
-            1)
+            a)
                 _user_create
                 _hold
                 ;;
-            2)
+            l)
                 _user_list
                 _hold
                 ;;
-            3)
+            v)
                 PLACEHOLD=''
-                echo "Which user do you want to see the properties of?"
+                echo 'Which user do you want to see the properties of?'
                 _user_attributes_list PLACEHOLD
                 _hold
                 ;;
-            4)
+            m)
                 _user_attributes_change
                 _hold
                 ;;
-            5)
+            d)
                 _user_remove
                 _hold
                 ;;
-            0)
+            b)
                 RUNUSR=0
                 ;;
+            q)
+                echo 'Exiting program.. '
+                CONTINUE=0
+                ;;
             *)
-                echo “Wrong input. Try again.
+                echo 'Wrong input. Try again.'
                 _hold
                 ;;
         esac                
     done
 }
 _user_menu() {
-    
-    echo "******************************************************"
-    echo "----------------------USER MENU-----------------------"
+    echo '******************************************************'
+    echo '----------------------USER MENU-----------------------'
 
-    echo "${RED}1${reset} - User Add       (Create a new user)"
-    echo "${RED}2${reset} - User List      (List all login users"
-    echo "${RED}3${reset} - User View      (View user properties"
-    echo "${RED}4${reset} - User Modify    (Modify user properties)"
-    echo "${RED}5${reset} - User Delete    (Delete a login user)"
-    echo "${RED}0${reset} - Exit           (Exit back to main menu)"
-    _hold
+    echo "${RED}a${reset} - User Add       (Create a new user)"
+    echo "${RED}l${reset} - User List      (List all login users"
+    echo "${RED}v${reset} - User View      (View user properties"
+    echo "${RED}m${reset} - User Modify    (Modify user properties)"
+    echo "${RED}d${reset} - User Delete    (Delete a login user)"
+    _choice_single
 }
 _user_create() {
     echo "Enter full name of user: "
-    echo -n “Choice >”
+    _choice_multiple
     read FULLNAME
     
     echo "Enter username of user: "
-    echo -n “Choice >”
+    _choice_multiple
     read USERNAME
     
     echo "Enter password of user: "
-    echo -n “Choice >”
+    _choice_multiple
     read -s PASSWORD
     
     useradd $USERNAME -c $FULLNAME -md /home/$USERNAME -s /bin/bash -p $PASSWORD
@@ -158,8 +158,7 @@ _user_list() {
 }
 _user_attributes_list() {
     echo -e "\nEnter username: "
-    _askif_exit
-    echo -n "Choice >"
+    _choice_multiple
     read USERNAME
 
     if [[ $USERNAME == 0 ]]
@@ -183,67 +182,72 @@ _user_attributes_list() {
         #eval GROUPS=`cat /etc/group | grep $USERNAME | awk -F ":" '{print $1}'`
         GROUPS=`groups $USERNAME | cut -d " " -f 3-`
 
-        echo -e "\n1. Username: $USERNAME" 
-        echo "2. User ID: $USERID"
-        echo "3. Primary group ID: $GROUPID"
-        echo "4. Comment: $COMMENT"
-        echo "5. Directory: $HOMEDIR"
-        echo "6. Shell: $SHELLDIR"
+        echo -e "\nu - Username: $USERNAME" 
+        echo "i - User ID: $USERID"
+        echo "g - Primary group ID: $GROUPID"
+        echo "c - Comment: $COMMENT"
+        echo "d - Directory: $HOMEDIR"
+        echo "s - Shell: $SHELLDIR"
         echo -e "\n. Groups: $GROUPS"
     else
         echo "Can't find user!"
     fi
-    eval "$1=$USERNAME"
+    #eval "$1=$USERNAME"
 }
 _user_attributes_change() {
     echo "Which user do you want to modify the properties of?"
-    USERNAME=''
-    _user_attributes_list USERNAME
+    #USERNAME=''
+    _user_attributes_list #USERNAME
     if [[ $USERNAME -eq 1 ]]
     then
         return  1
     fi
 
     echo -e "\nWhich property do you want to modify?"
-    echo "Enter number of field: "
-    echo -en "Choice >"
-    _hold
+    _choice_single
     echo -e "\nWhat do you want to change it to?"
+    _choice_multiple
     read NEWDATA
 
 
     case $INPUT in
-        1)
+        u)
             usermod -l $NEWDATA $USERNAME
             # Döper om hemdirectoriet, detta kan möjligtvis behövas ändras 
             mv /home/$USERNAME /home/$NEWDATA
             _user_attribute_success
             ;;
-        2)
+        i)
             usermod -u $NEWDATA $USERNAME
             _user_attribute_success
             ;;
-        3)
+        g)
             groupmod -g $NEWDATA $USERNAME
             _user_attribute_success
             ;;
-        4)
+        c)
             usermod -c $NEWDATA $USERNAME
             _user_attribute_success
             ;;
-        5)
+        d)
             usermod -md $NEWDATA $USERNAME
             _user_attribute_success
             ;;
-        6)
+        s)
             usermod -s $NEWDATA $USERNAME
             _user_attribute_success
             ;;
-        0)
+        b)
             return 1
+            ;;
+        q)
+            echo 'Exiting program..'
+            CONTINUE=0
             ;;
         *)
             echo 'Invalid option.'
+            _hold
+            ;;
     esac
 }
 _user_attribute_success() {
@@ -267,7 +271,7 @@ _user_remove() {
 }
 _user_ask_which() {
     echo 'Enter username:'
-    echo -en "Choice >"
+    _choice_multiple
 }
 
 ######################
@@ -280,47 +284,50 @@ _directory() {
     do
         _directory_menu
         case $INPUT in
-            1) 
+            a) 
                 _directory_add
                 _hold
                 ;;
-            2)
+            l)
                 _directory_list
                 _hold
                 ;;
-            3)
+            v)
                 _directory_view
                 _hold
                 ;;
-            4)
+            m)
                 _directory_modify
                 _hold
                 ;;
-            5)
+            d)
                 _directory_delete
                 _hold
                 ;;
-            0)
+            b)
                 RUNDIR=0
                 ;;
+            q)
+                echo 'Exiting program…'
+                CONTINUE=0
+                ;;
             *)
-                echo “Wrong input. Try again”
+                echo 'Wrong input. Try again'
                 _hold
                 ;;
         esac
     done
 }
 _directory_menu() {
-    echo "******************************************************"
-    echo "--------------------DIRECTORY MENU--------------------"
+    echo '******************************************************'
+    echo '--------------------DIRECTORY MENU--------------------'
 
-    echo "${GREEN}1${reset} - Directory Add      (Creates a new directory)"
-    echo "${GREEN}2${reset} - Directory List     (Lists all content inside of directory)" 
-    echo "${GREEN}3${reset} - Directory View     (View directory properties)"
-    echo "${GREEN}4${reset} - Directory Modify   (Modify directory properties)" 
-    echo "${GREEN}5${reset} - Directory Delete   (Delete a directory)"
-    echo "${GREEN}0${reset}  - Exit               (Exit back to the main menu)"
-    _hold
+    echo "${GREEN}a${reset} - Directory Add      (Creates a new directory)"
+    echo "${GREEN}l${reset} - Directory List     (Lists all content inside of directory)" 
+    echo "${GREEN}v${reset} - Directory View     (View directory properties)"
+    echo "${GREEN}m${reset} - Directory Modify   (Modify directory properties)" 
+    echo "${GREEN}d${reset} - Directory Delete   (Delete a directory)"
+    _choice_single
 }
 _directory_add() {
     echo "Directory add"
@@ -348,29 +355,32 @@ _group() {
     do
         _group_menu
         case $INPUT in
-            1)
+            a)
                 _group_create
                 _hold
                 ;;
-            2) 
+            l) 
                 _group_list
                 _hold
                 ;;
-            3)
+            v)
                 _group_list_users_in_specific_group
                 _hold
                 ;;
-            4)
+            m)
                 _group_modify
                 _hold
                 ;;
-            5)
+            d)
                 _group_remove
                 _hold
                 ;;            
-            0)
-                echo "Exiting.."
+            b)
                 RUNGRP=0
+                ;;
+            q)
+                echo “Exiting…”
+                CONTINUE=0
                 ;;
             *)
                 echo “Wrong input. Try again”
@@ -383,13 +393,12 @@ _group_menu() {
     echo "******************************************************"
     echo "---------------------GROUPS MENU----------------------"
 
-    echo "${BLUE}1${reset} - Group Add     (Adds a new group)"
-    echo "${BLUE}2${reset} - Group List    (List all groups (Non system))"
-    echo "${BLUE}3${reset} - Group View    (Lists all users in a group)"
-    echo "${BLUE}4${reset} - Group Modify  (Add/remove user from a group)"
-    echo "${BLUE}5${reset} - Group delete  (Delete a group)"
-    echo "${BLUE}0${reset}  - Exit          (Exit back to the main menu)"
-    _hold
+    echo "${BLUE}a${reset} - Group Add     (Adds a new group)"
+    echo "${BLUE}l${reset} - Group List    (List all groups (Non system))"
+    echo "${BLUE}v${reset} - Group View    (Lists all users in a group)"
+    echo "${BLUE}m${reset} - Group Modify  (Add/remove user from a group)"
+    echo "${BLUE}d${reset} - Group delete  (Delete a group)"
+    _choice_single
 }
 _group_create() {
     _group_ask_which
@@ -438,22 +447,24 @@ _group_list_users_in_specific_group() {
     echo "Group members: $USERS"
 }
 _group_modify() {
-    CONTINUE=1
-    while [[ $CONTINUE -eq 1 ]]
+    RUNGRPMOD=1
+    while [[ $RUNGRPMOD-eq 1 ]]
     do
         echo -e "Do you want to add or remove a user?\n"
-        echo "1 - Add user"
-        echo "2 - Remove user"
-        echo "0 - Exit"
-        _hold
+        echo "a - Add user"
+        echo "r - Remove user"
+        _choice_single
         case $INPUT in
-            1)
+            a)
                 _group_add_user
                 ;;
-            2)
+            r)
                 _group_remove_user
                 ;;
-            0)
+            b)
+                RUNGRPMOD=0
+                ;;
+            q)
                 echo "Exiting.."
                 CONTINUE=0
                 ;;
@@ -540,12 +551,16 @@ _group_remove() {
             echo "The group is a primary group."
             echo "Are you sure you want to delete it?"
             echo "Enter [y] to confirm."
-            echo -en "Choice >"
-            read INPUT
+            _choice_single
             if [[ $INPUT == "y" ]]
             then
                 groupdel -f $NAME
                 echo "Primary group $NAME has been deleted."
+            elif [[ $INPUT == "q" ]]
+            then
+                echo 'Exiting program..'
+                CONTINUE=0
+                ;;
             else
                 echo 'Exiting.. '
             fi
@@ -558,7 +573,7 @@ _group_remove() {
 }
 _group_ask_which() {
     echo 'Enter name of group:'
-    echo -en 'Choice >'
+    _choice_multiple
 }
 
 ######################
@@ -640,9 +655,6 @@ _network_interfaces() {
         STATUS=`ip link show $NAME | awk '{print $9}'`
     done
 }
-
-
-
 _network_interface_name() {
     INTERFACES=`ip link show | awk '{print $2}' | awk 'NR%2==1' | sed “s/:/ /g” | awk 'NR!=1'`
     echo -e “Your network interfaces are:\n$INTERFACES”
@@ -693,6 +705,11 @@ _network_status() {
     fi
     _hold
 }
+
+######################
+#        INPUT      #
+####################
+
 _hold() {
     #Wait for user input before continuing to next step
     echo "-------------------------------------------------"
@@ -707,9 +724,7 @@ _choice_single() {
 }
 _choice_multiple() {
     echo "-------------------------------------------------"
-    echo "(q - Quit, b - Back)"
     echo -en 'Enter choice: \n\n'
-    read INPUT
 }
 
 # DENNA SKA TAS BORT
