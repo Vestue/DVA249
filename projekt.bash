@@ -41,7 +41,7 @@ _main() {
                 CONTINUE=0
                 ;;
             q)
-                echo 'Exiting…'
+                echo 'Exiting program… '
                 CONTINUE=0
                 ;;
             *)
@@ -52,7 +52,7 @@ _main() {
     done
 }
 _main_menu() {
-    echo "******************************************************"
+    echo -e "\n******************************************************"
     echo "--------------------SYSTEM MANAGER--------------------"
     echo "${RED}u${reset} Users"
     echo ""
@@ -112,7 +112,7 @@ _user() {
     done
 }
 _user_menu() {
-    echo '******************************************************'
+    echo -e "\n******************************************************"
     echo '----------------------USER MENU-----------------------'
 
     echo "${RED}a${reset} - User Add       (Create a new user)"
@@ -148,7 +148,7 @@ _user_create() {
     fi
 }
 _user_list() {
-    echo “Listing users.. “
+    echo 'Listing users.. '
     echo -e "(Please wait)\n"
     # Hitta vilken range UID som används för login-användare
     MIN=`cat /etc/login.defs | grep UID_MIN | awk '{print $2}' | head -1`
@@ -319,7 +319,7 @@ _directory() {
     done
 }
 _directory_menu() {
-    echo '******************************************************'
+    echo -e "\n******************************************************"
     echo '--------------------DIRECTORY MENU--------------------'
 
     echo "${GREEN}a${reset} - Directory Add      (Creates a new directory)"
@@ -390,7 +390,7 @@ _group() {
     done
 }
 _group_menu() {
-    echo "******************************************************"
+    echo -e "\n******************************************************"
     echo "---------------------GROUPS MENU----------------------"
 
     echo "${BLUE}a${reset} - Group Add     (Adds a new group)"
@@ -416,7 +416,7 @@ _group_create() {
     fi
 }
 _group_list() {
-    echo “Listing groups.. “
+    echo 'Listing groups.. '
     echo -e "(Please wait)\n"
     MIN=`cat /etc/login.defs | grep GID_MIN | awk '{print $2}' | head -1`
     MAX=`cat /etc/login.defs | grep GID_MAX | awk '{print $2}' | head -1`
@@ -448,7 +448,7 @@ _group_list_users_in_specific_group() {
 }
 _group_modify() {
     RUNGRPMOD=1
-    while [[ $RUNGRPMOD-eq 1 ]]
+    while [[ $RUNGRPMOD -eq 1 ]]
     do
         echo -e "Do you want to add or remove a user?\n"
         echo "a - Add user"
@@ -560,7 +560,6 @@ _group_remove() {
             then
                 echo 'Exiting program..'
                 CONTINUE=0
-                ;;
             else
                 echo 'Exiting.. '
             fi
@@ -617,7 +616,7 @@ _network() {
     done
 }
 _network_menu() {
-    echo "******************************************************"
+    echo -e "\n******************************************************"
     echo "--------------------NETWORK MENU----------------------"
 
     echo -en "${RED}Computer name: ${reset}"
