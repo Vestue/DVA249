@@ -623,7 +623,7 @@ _network_menu() {
     echo -e "\n******************************************************"
     echo "--------------------NETWORK MENU----------------------"
 
-    echo -en "${RED}Computer name: ${reset}"
+    echo -en "${YELLOW}Computer name: ${reset}"
     _network_pcname
     _network_interfaces
     _hold
@@ -636,7 +636,9 @@ _network_interfaces() {
     # Läs in alla interfaces förutom loopback, lo
     INTERFACES=`ip link show | awk '{print $2}' | awk 'NR%2==1' | sed 's/:/ /g' | awk 'NR!=1'`
     i=0
-    for interface in INTERFACES
+
+    # Loopar igenom och skriver ut en egen del för varje interface
+    for interface in $INTERFACES
     do
         i=$((i+1))
         echo -ne "\n${YELLOW}Interface: ${reset}"
@@ -663,13 +665,28 @@ _network_interfaces() {
             echo $GATEWAY
         fi
 
-        echo -n "${YELLOW}MAC: ${reset}"
-        MACADDRESS=`ip link show $NAME | grep link/ether | awk '{print $2}'`
-        echo $MACADDRESS
+        # Print MAC-address if one is found
+        MACADDRESS=`ip link show $NAME | grep link/ether`
+        RETVAL=$?
+        if [[ $RETVAL -eq 0 ]]
+        then
+            echo -n "${YELLOW}MAC: ${reset}"
+            MACADDRESS=`ip link show $NAME | grep link/ether | awk '{print $2}'`
+            echo $MACADDRESS
+        fi
 
+        # Skriver ut status med olika färger beroende på status
         echo -n "${YELLOW}Status: ${reset}"
         STATUS=`ip link show $NAME | awk '{print $9}'`
-        echo $STATUS
+        if [[ $STATUS == "UP" ]]
+        then
+            echo "${GREEN}$STATUS${reset}"
+        elif [[ $STATUS == "DOWN" ]]
+        then
+            echo "${RED}$STATUS${reset}"
+        else
+            echo $STATUS
+        fi
     done
 }
 _network_interface_name() {
@@ -729,18 +746,18 @@ _network_status() {
 
 _hold() {
     #Wait for user input before continuing to next step
-    echo "-------------------------------------------------"
+    echo "------------------------------------------------------"
     echo -en 'Press any key to continue..\n\n'
     read -sn1 INPUT
 }
 _choice_single() {
-    echo "-------------------------------------------------"
+    echo "------------------------------------------------------"
     echo "(q - Quit, b - Back)"
     echo -en 'Enter choice: \n\n'
     read -sn1 INPUT
 }
 _choice_multiple() {
-    echo "-------------------------------------------------"
+    echo "------------------------------------------------------"
     echo -en 'Enter choice: \n\n'
 }
 
