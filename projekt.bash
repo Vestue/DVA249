@@ -149,13 +149,12 @@ _user_create() {
     fi
 }
 _user_list() {
-    echo 'Listing users.. '
-    echo -e "(Please wait)\n"
+    echo -e "${RED}Users: ${reset}\n"
     # Hitta vilken range UID som används för login-användare
     MIN=`cat /etc/login.defs | grep UID_MIN | awk '{print $2}' | head -1`
     MAX=`cat /etc/login.defs | grep UID_MAX | awk '{print $2}' | head -1`
 
-    eval getent passwd {$MIN..$MAX} | cut -d: -f1 
+    eval getent passwd | awk -v min="$MIN" -v max="$MAX" -F ":" '$3 >= min && $3 <= max {print $1}'
 }
 _user_attributes_list() {
     echo -e "\nEnter username: "
@@ -420,11 +419,10 @@ _group_create() {
     fi
 }
 _group_list() {
-    echo 'Listing groups.. '
-    echo -e "(Please wait)\n"
+    echo -e "${BLUE}Groups: ${reset}\n"
     MIN=`cat /etc/login.defs | grep GID_MIN | awk '{print $2}' | head -1`
     MAX=`cat /etc/login.defs | grep GID_MAX | awk '{print $2}' | head -1`
-    eval getent group {$MIN..$MAX} | awk -F ":" '{print $1}'
+    eval getent group | awk -v min="$MIN" -v max="$MAX" -F ":" '$3 >= min && $3 <= max {print $1}'
 }
 _group_list_users_in_specific_group() {
     _group_ask_which
