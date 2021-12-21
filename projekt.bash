@@ -630,7 +630,7 @@ _network_menu() {
 }
 _network_pcname() {
     NAME=`hostname`
-    echo -e  "$NAME\n"
+    echo -en "$NAME\n"
 }
 _network_interfaces() {
     # Läs in alla interfaces förutom loopback, lo
@@ -639,23 +639,37 @@ _network_interfaces() {
     for interface in INTERFACES
     do
         i=$((i+1))
-        echo -ne "\n${RED}Interface: ${reset}"
+        echo -ne "\n${YELLOW}Interface: ${reset}"
         NAME=`echo $INTERFACES | cut -d ' ' -f $i`
         echo $NAME
-        echo -n "${RED}IP address: ${reset}"
-        ADDRESS=`ip -d addr show $NAME | grep inet | awk '{print $2}' | head -1`
-        echo $ADDRESS
 
-        echo -n "${RED}Gateway: ${reset}"
-        GATEWAY=`ip r | grep $NAME | tail -1 | awk '{print $3}'`
-        echo $GATEWAY
+        # Print ip-address if there is one in the interface
+        ADDRESS=`ip addr show $NAME | grep inet`
+        RETVAL=$?
+        if [[ $RETVAL -eq 0 ]]
+        then
+            ADDRESS=`ip addr show $NAME | grep inet | awk '{print $2}' | head -1`
+            echo -n "${YELLOW}IP address: ${reset}"
+            echo $ADDRESS
+        fi
 
-        echo -n "${RED}MAC: ${reset}"
-        MACADDRESS=`ip -d show $NAME | grep link/ether | awk '{print $2}'`
-        echo MACADDRESS
+        # Print gateway if one is found
+        GATEWAY=`ip route | grep $NAME`
+        RETVAL=$?
+        if [[ $RETVAL -eq 0 ]]
+        then
+            echo -n "${YELLOW}Gateway: ${reset}"
+            GATEWAY=`ip r | grep $NAME | tail -1 | awk '{print $3}'`
+            echo $GATEWAY
+        fi
 
-        echo -n "${RED}Status: ${reset}"
+        echo -n "${YELLOW}MAC: ${reset}"
+        MACADDRESS=`ip link show $NAME | grep link/ether | awk '{print $2}'`
+        echo $MACADDRESS
+
+        echo -n "${YELLOW}Status: ${reset}"
         STATUS=`ip link show $NAME | awk '{print $9}'`
+        echo $STATUS
     done
 }
 _network_interface_name() {
