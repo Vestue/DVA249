@@ -625,17 +625,14 @@ _group_list_users_in_specific_group() {
     USERS=`getent group $NAME | awk -F ":" '{print $4}'`
 
     # Test if the group is a primary group.
-    eval getent passwd $NAME $> /dev/null
+    getent passwd $NAME &> /dev/null
     RETVAL=$?
     if [[ $RETVAL -eq 0 ]]
     then
         # The primary user of the primary group needs to be added
         # to the print of the members of the group.
-        # THIS DOES NOT CURRENTLY WORK!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        USERS=$NAME
-        #USERS="$NAME, $USERS"
+        USERS="${NAME}, ${USERS}"
     fi
-
     echo "Group members: $USERS"
 }
 _group_modify() {
