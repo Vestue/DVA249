@@ -1,6 +1,13 @@
 #!/bin/bash
 
-#Check if run as root
+#######################################################
+##                                                   ##
+ ##  Oscar Einarsson and Ragnar Winblad von Walter  ##
+   ##                                              ##
+    ##                GROUP 30                   ##
+     #############################################
+
+#Check if the program is run as root.
 if [[ `id -u` -ne 0 ]]
 then
     echo 'Please run the command with sudo.'
@@ -12,6 +19,7 @@ fi
 #####################
 
 _main() {
+    # Setup the colors that are used by the printed menus.
     RED=`tput setaf 1`
     GREEN=`tput setaf 2`
     BLUE=`tput setaf 4`
@@ -22,7 +30,8 @@ _main() {
     CONTINUE=1
     while [[ $CONTINUE -eq 1 ]]
     do
-    _main_menu
+        _main_menu
+        _choice_single
         case $INPUT in
             u)
                 _user
@@ -62,7 +71,6 @@ _main_menu() {
     echo
     echo "${YELLOW}n${reset} Network"
     echo
-    _choice_single
 }
 
 ######################
@@ -74,6 +82,7 @@ _user() {
     while [[ $RUNUSR -eq 1 ]]
     do
         _user_menu
+        _choice_single
         case $INPUT in
             a)
                 _user_create
@@ -84,9 +93,8 @@ _user() {
                 _hold
                 ;;
             v)
-                PLACEHOLD=''
                 echo 'Which user do you want to see the properties of?'
-                _user_attributes_list PLACEHOLD
+                _user_attributes_list
                 _hold
                 ;;
             m)
@@ -115,13 +123,11 @@ _user() {
 _user_menu() {
     echo -e "\n******************************************************"
     echo '----------------------USER MENU-----------------------'
-
     echo "${RED}a${reset} - User Add       (Create a new user)"
     echo "${RED}l${reset} - User List      (List all login users"
     echo "${RED}v${reset} - User View      (View user properties"
     echo "${RED}m${reset} - User Modify    (Modify user properties)"
     echo "${RED}d${reset} - User Delete    (Delete a login user)"
-    _choice_single
 }
 _user_create() {
     echo "Enter full name of user: "
@@ -150,70 +156,72 @@ _user_create() {
 }
 _user_list() {
     echo -e "${RED}Users: ${reset}\n"
-    # Hitta vilken range UID som används för login-användare
+
+    # Find the UID range for login-users in the system.
     MIN=`cat /etc/login.defs | grep UID_MIN | awk '{print $2}' | head -1`
     MAX=`cat /etc/login.defs | grep UID_MAX | awk '{print $2}' | head -1`
 
+    # Find the users that are within the range.
     eval getent passwd | awk -v min="$MIN" -v max="$MAX" -F ":" '$3 >= min && $3 <= max {print $1}'
 }
 _user_attributes_list() {
-    echo -e "\nEnter username: "
-    _choice_multiple
+    _user_ask_which
     read USERNAME
-
-    if [[ $USERNAME == 0 ]]
-    then
-        return  1
-    fi
 
     ATTR=`getent passwd $USERNAME`
     RETVAL=$?
     if [[ $RETVAL -eq 0 ]]
     then
-        USERID=`echo $ATTR | awk -F ":" '{print $3}'`
-        GROUPID=`echo $ATTR | awk -F ":" '{print $4}'`
-        COMMENT=`echo $ATTR | awk -F ":" '{print $5}'`
-        HOMEDIR=`echo $ATTR | awk -F ":" '{print $6}'`
-        SHELLDIR=`echo $ATTR | awk -F ":" '{print $7}'`
-        
-        # Ger för tillfället en \n separerad lista på grupper, detta borde ändras till att separeras med kommatecken
-        # Kan möjligtvis bytas ut mot att kalla _group_list istället sen
-
-        #eval GROUPS=`cat /etc/group | grep $USERNAME | awk -F ":" '{print $1}'`
-        GROUPS=`groups $USERNAME | cut -d " " -f 3-`
-
         echo -e "\n${RED}u${reset} - Username: $USERNAME" 
+
+        PASSX=`echo $ATTR | awk -F ":" '{print $2}'`
+        echo "${RED}p${reset} - Password: $PASSX"
+
+        USERID=`echo $ATTR | awk -F ":" '{print $3}'`
         echo "${RED}i${reset} - User ID: $USERID"
+
+        GROUPID=`echo $ATTR | awk -F ":" '{print $4}'`
         echo "${RED}g${reset} - Primary group ID: $GROUPID"
+
+        COMMENT=`echo $ATTR | awk -F ":" '{print $5}'`
         echo "${RED}c${reset} - Comment: $COMMENT"
+
+        HOMEDIR=`echo $ATTR | awk -F ":" '{print $6}'`
         echo "${RED}d${reset} - Directory: $HOMEDIR"
+
+        SHELLDIR=`echo $ATTR | awk -F ":" '{print $7}'`
         echo "${RED}s${reset} - Shell: $SHELLDIR"
+
+        GROUPS=`groups $USERNAME | cut -d " " -f 3- | sed "s/ /,/g"`
         echo -e "\n. Groups: $GROUPS"
     else
         echo "Can't find user!"
     fi
-    #eval "$1=$USERNAME"
 }
 _user_attributes_change() {
     echo "Which user do you want to modify the properties of?"
-    #USERNAME=''
-    _user_attributes_list #USERNAME
-    if [[ $USERNAME -eq 1 ]]
-    then
-        return  1
-    fi
+
+    # Asks the user to input a username and then prints a list with the chosen users attributes.
+    _user_attributes_list
 
     echo -e "\nWhich property do you want to modify?"
     _choice_single
+
+    # Changing password triggers a special dialogue.
+    if [[ $INPUT == "p" ]]
+    then
+        passwd $USERNAME
+        return 0
+    fi
+
     echo -e "\nWhat do you want to change it to?"
     _choice_multiple
     read NEWDATA
 
-
     case $INPUT in
         u)
             usermod -l $NEWDATA $USERNAME
-            # Döper om hemdirectoriet, detta kan möjligtvis behövas ändras 
+            # Renames the homedirectory so that the user keeps the old files.
             mv /home/$USERNAME /home/$NEWDATA
             _user_attribute_success
             ;;
@@ -284,6 +292,7 @@ _directory() {
     while [[ $RUNDIR -eq 1 ]]
     do
         _directory_menu
+        _choice_single
         case $INPUT in
             a) 
                 _directory_add
@@ -323,13 +332,11 @@ _directory() {
 _directory_menu() {
     echo -e "\n******************************************************"
     echo '--------------------DIRECTORY MENU--------------------'
-
     echo "${GREEN}a${reset} - Directory Add      (Creates a new directory)"
     echo "${GREEN}l${reset} - Directory List     (Lists all content inside of directory)" 
     echo "${GREEN}v${reset} - Directory View     (View directory properties)"
     echo "${GREEN}m${reset} - Directory Modify   (Modify directory properties)" 
     echo "${GREEN}d${reset} - Directory Delete   (Delete a directory)"
-    _choice_single
 }
 _directory_add(){
 	echo -n "Enter directory name >"
@@ -531,6 +538,7 @@ _group() {
     while [[ $RUNGRP -eq 1 ]]
     do
         _group_menu
+        _choice_single
         case $INPUT in
             a)
                 _group_create
@@ -570,13 +578,11 @@ _group() {
 _group_menu() {
     echo -e "\n******************************************************"
     echo "---------------------GROUPS MENU----------------------"
-
     echo "${BLUE}a${reset} - Group Add     (Adds a new group)"
     echo "${BLUE}l${reset} - Group List    (List all groups (Non system))"
     echo "${BLUE}v${reset} - Group View    (Lists all users in a group)"
     echo "${BLUE}m${reset} - Group Modify  (Add/remove user from a group)"
     echo "${BLUE}d${reset} - Group delete  (Delete a group)"
-    _choice_single
 }
 _group_create() {
     _group_ask_which
@@ -595,13 +601,19 @@ _group_create() {
 }
 _group_list() {
     echo -e "${BLUE}Groups: ${reset}\n"
+
+    # Find the GID range for user made groups in the system.
     MIN=`cat /etc/login.defs | grep GID_MIN | awk '{print $2}' | head -1`
     MAX=`cat /etc/login.defs | grep GID_MAX | awk '{print $2}' | head -1`
+
+    # Print groups within the range.
     eval getent group | awk -v min="$MIN" -v max="$MAX" -F ":" '$3 >= min && $3 <= max {print $1}'
 }
 _group_list_users_in_specific_group() {
     _group_ask_which
     read NAME
+
+    # Test if the group exists.
     getent group $NAME &> /dev/null
     RETVAL=$?
     if [[ $RETVAL -eq 2 ]]
@@ -612,15 +624,15 @@ _group_list_users_in_specific_group() {
 
     USERS=`getent group $NAME | awk -F ":" '{print $4}'`
 
-    # Testar om gruppen är en primärgrupp
-    eval getent passwd $NAME $> /dev/null
+    # Test if the group is a primary group.
+    getent passwd $NAME &> /dev/null
     RETVAL=$?
     if [[ $RETVAL -eq 0 ]]
     then
-        USERS=$NAME
-        #USERS="$NAME, $USERS"
+        # The primary user of the primary group needs to be added
+        # to the print of the members of the group.
+        USERS="${NAME}, ${USERS}"
     fi
-
     echo "Group members: $USERS"
 }
 _group_modify() {
@@ -644,6 +656,8 @@ _group_modify() {
             q)
                 echo "Exiting.."
                 CONTINUE=0
+                RUNGRP=0
+                RUNGRPMOD=0
                 ;;
             *)
                 echo "Invalid input. Try again."
@@ -655,6 +669,8 @@ _group_add_user() {
     echo 'Which group do you want to add a user to?'
     _group_ask_which
     read GROUPNAME
+
+    # Check if group exists.
     getent group $GROUPNAME $> /dev/null
     RETVAL=$?
     if [[ $RETVAL -ne 0 ]]
@@ -666,6 +682,8 @@ _group_add_user() {
     echo -e "\nWhich user do you want to add to the group?"
     _user_ask_which
     read USERNAME
+
+    # Check if user exists.
     getent passwd $USERNAME $> /dev/null
     RETVAL=$?
     if [[ $RETVAL -ne 0 ]]
@@ -674,6 +692,7 @@ _group_add_user() {
         return
     fi
 
+    # Everything is good, add user to group.
     adduser $USERNAME $GROUPNAME
     echo "$USERNAME has been added to $GROUPNAME!"
 }
@@ -681,6 +700,8 @@ _group_remove_user() {
     echo 'Which group do you want to remove a user from?'
     _group_ask_which
     read GROUPNAME
+
+    # Check if group exists.
     getent group $GROUPNAME $> /dev/null
     RETVAL=$?
     if [[ $RETVAL -ne 0 ]]
@@ -692,6 +713,8 @@ _group_remove_user() {
     echo -e "\nWhich user do you want to remove from the group?"
     _user_ask_which
     read USERNAME
+
+    # Check if user exists.
     getent passwd $USERNAME $> /dev/null
     RETVAL=$?
     if [[ $RETVAL -ne 0 ]]
@@ -700,12 +723,15 @@ _group_remove_user() {
         return
     fi
 
+    # Everything is good, remove user from group.
     deluser $USERNAME $GROUPNAME
     echo "$USERNAME has been removed from $GROUPNAME!"
 }
 _group_remove() {
     _group_ask_which
     read NAME
+
+    # Check if group exists.
     getent group $NAME &> /dev/null
     RETVAL=$?
     if [[ $RETVAL -eq 2 ]]
@@ -714,11 +740,13 @@ _group_remove() {
         return
     fi
 
+    # Get the GID of the group, and min and max GID values for
+    # user made groups in the system.
     GROUPID=`getent group $NAME | awk -F ":" '{print $3}'`
     MIN=`cat /etc/login.defs | grep GID_MIN | awk '{print $2}' | head -1`
     MAX=`cat /etc/login.defs | grep GID_MAX | awk '{print $2}' | head -1`
 
-    # Om gruppen är inom intervallet för användargrupper
+    # Check if the group is within the GID range of user created groups.
     if [[ $GROUPID -ge $MIN && $GROUPID -le $MAX ]]
     then
         groupdel $NAME &> /dev/null
@@ -756,42 +784,6 @@ _group_ask_which() {
 #       NETWORK     #
 ####################
 
-_network() {
-    RUNNET=1
-    while [[ $RUNNET -eq 1 ]]
-    do
-        _network_menu
-        case $INPUT in
-            1)
-                _network_pcname
-                ;;
-
-            2)
-                _network_interface_name
-                ;;
-
-            # De under kan behöva ändras för att hantera enskilda interfaces
-            3)
-                _network_ip
-                ;;
-            4)
-                _network_mac
-                ;;
-            5)
-                _network_gateway
-                ;;
-            6)
-                _network_status
-                ;;
-            0)
-                RUNNET=0
-                ;;
-            *)
-                echo "Invalid option. Try again"
-                ;;
-        esac
-    done
-}
 _network_menu() {
     echo -e "\n******************************************************"
     echo "--------------------NETWORK MENU----------------------"
@@ -806,11 +798,11 @@ _network_pcname() {
     echo -en "$NAME\n"
 }
 _network_interfaces() {
-    # Läs in alla interfaces förutom loopback, lo
+    # Read all interfaces except loopback, lo.
     INTERFACES=`ip link show | awk '{print $2}' | awk 'NR%2==1' | sed 's/:/ /g' | awk 'NR!=1'`
     i=0
 
-    # Loopar igenom och skriver ut en egen del för varje interface
+    # Loop through the interfaces and print the info of every interface by itself.
     for interface in $INTERFACES
     do
         i=$((i+1))
@@ -818,7 +810,7 @@ _network_interfaces() {
         NAME=`echo $INTERFACES | cut -d ' ' -f $i`
         echo $NAME
 
-        # Print ip-address if there is one in the interface
+        # Print ip-address if there is one in the interface.
         ADDRESS=`ip addr show $NAME | grep inet`
         RETVAL=$?
         if [[ $RETVAL -eq 0 ]]
@@ -828,7 +820,7 @@ _network_interfaces() {
             echo $ADDRESS
         fi
 
-        # Print gateway if one is found
+        # Print gateway if one is found.
         GATEWAY=`ip route | grep $NAME`
         RETVAL=$?
         if [[ $RETVAL -eq 0 ]]
@@ -838,7 +830,7 @@ _network_interfaces() {
             echo $GATEWAY
         fi
 
-        # Print MAC-address if one is found
+        # Print MAC-address if one is found.
         MACADDRESS=`ip link show $NAME | grep link/ether`
         RETVAL=$?
         if [[ $RETVAL -eq 0 ]]
@@ -848,7 +840,7 @@ _network_interfaces() {
             echo $MACADDRESS
         fi
 
-        # Skriver ut status med olika färger beroende på status
+        # Print status with diffrent color depending on the status.
         echo -n "${YELLOW}Status: ${reset}"
         STATUS=`ip link show $NAME | awk '{print $9}'`
         if [[ $STATUS == "UP" ]]
@@ -862,83 +854,29 @@ _network_interfaces() {
         fi
     done
 }
-_network_interface_name() {
-    INTERFACES=`ip link show | awk '{print $2}' | awk 'NR%2==1' | sed “s/:/ /g” | awk 'NR!=1'`
-    echo -e “Your network interfaces are:\n$INTERFACES”
-    _hold
-}
-_network_ip() {
-    
-    IPADDRESS=`hostname -I | awk '{print $1}'`
-    echo “IP-address: $IPADDRESS”
-    _hold
-}
-_network_mac() {
-    MACADDRESS=`ip link show | egrep “link/ether” | awk '{print $2}'`
-    echo “MAC-address: $MACADDRESS”
-    _hold
-}
-_network_gateway() {
-    GATEWAY=`ip route | grep default | awk '{print $3}'`
-    echo  “Gateway: $GATEWAY”
-    _hold
-}
-_network_status() {    
-    CONTINUE=1
-    while [[ CONTINUE -eq 1 ]]
-    do
-        echo -e "Which network interface do you want to see the status of?\n(Enter [1] to list all networks.\n)"
-        echo -n “Choice: “
-        read INPUT
-        
-        if [[ $INPUT -eq 1 ]]
-        then
-            _name_interface_name
-            _hold
-        else
-            CONTINUE=0
-        fi
-    done
-    
-    STATUS=`ip link show $INPUT | awk '{print $9}' | head -1`
-    if [[ $STATUS == “UP” ]]
-    then
-        echo “$INPUT is up!”
-    elif [[ $STATUS == “DOWN” ]]
-    then
-        echo “$INPUT is down!”
-    else
-        echo "Can't find network."
-    fi
-    _hold
-}
 
 ######################
 #        INPUT      #
 ####################
 
 _hold() {
-    #Wait for user input before continuing to next step
+    # Wait for user input before continuing to next step.
     echo "------------------------------------------------------"
     echo -en 'Press any key to continue..\n\n'
     read -sn1 INPUT
 }
 _choice_single() {
+    # Let the user make a single choice and then instantly move to next step.
     echo "------------------------------------------------------"
     echo "(q - Quit, b - Back)"
     echo -en 'Enter choice: \n\n'
     read -sn1 INPUT
 }
 _choice_multiple() {
+    # Let the user enter a full string.
     echo "------------------------------------------------------"
     echo -en 'Enter choice: \n\n'
 }
 
-# DENNA SKA TAS BORT
-_askif_exit() {
-    echo "(Enter [0] to exit.)"
-}
-
-# Ska vara längst ned
-# Eftersom main-funktionen kallas längst ned spelar det ingen roll vilken ordning funktionerna placeras
+# Main is called at the end, causing the order of the functions to not matter.
 _main
