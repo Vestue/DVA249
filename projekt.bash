@@ -267,7 +267,7 @@ _user_remove() {
     _user_ask_which
     read USERNAME
 
-    userdel -r $USERNAME
+    userdel -r $USERNAME &> /dev/null
     RETVAL=$?
     if [[ $RETVAL -eq 0 ]]
     then
