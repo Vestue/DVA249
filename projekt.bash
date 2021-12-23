@@ -565,7 +565,6 @@ _group() {
                 ;;
             m)
                 _group_modify
-                _hold
                 ;;
             d)
                 _group_remove
@@ -598,7 +597,7 @@ _group_menu() {
 _group_create() {
     _group_ask_which
     read NAME
-    eval addgroup $NAME
+    eval addgroup $NAME 2> /dev/null
     RETVAL=$?
     if [[ $RETVAL -eq 0 ]]
     then
@@ -682,11 +681,11 @@ _group_add_user() {
     read GROUPNAME
 
     # Check if group exists.
-    getent group $GROUPNAME $> /dev/null
+    getent group $GROUPNAME 1> /dev/null
     RETVAL=$?
     if [[ $RETVAL -ne 0 ]]
     then
-        echo "Can't find group. Try again."
+        echo -e "\nCan't find group. Try again.\n"
         return
     fi
 
@@ -695,7 +694,7 @@ _group_add_user() {
     read USERNAME
 
     # Check if user exists.
-    getent passwd $USERNAME $> /dev/null
+    getent passwd $USERNAME 1> /dev/null
     RETVAL=$?
     if [[ $RETVAL -ne 0 ]]
     then
@@ -704,7 +703,7 @@ _group_add_user() {
     fi
 
     # Everything is good, add user to group.
-    adduser $USERNAME $GROUPNAME
+    adduser $USERNAME $GROUPNAME &> /dev/null
     echo "$USERNAME has been added to $GROUPNAME!"
 }
 _group_remove_user() {
@@ -713,7 +712,7 @@ _group_remove_user() {
     read GROUPNAME
 
     # Check if group exists.
-    getent group $GROUPNAME $> /dev/null
+    getent group $GROUPNAME 1> /dev/null
     RETVAL=$?
     if [[ $RETVAL -ne 0 ]]
     then
@@ -726,7 +725,7 @@ _group_remove_user() {
     read USERNAME
 
     # Check if user exists.
-    getent passwd $USERNAME $> /dev/null
+    getent passwd $USERNAME 1> /dev/null
     RETVAL=$?
     if [[ $RETVAL -ne 0 ]]
     then
@@ -735,7 +734,7 @@ _group_remove_user() {
     fi
 
     # Everything is good, remove user from group.
-    deluser $USERNAME $GROUPNAME
+    deluser $USERNAME $GROUPNAME &> /dev/null
     echo "$USERNAME has been removed from $GROUPNAME!"
 }
 _group_remove() {
@@ -743,7 +742,7 @@ _group_remove() {
     read NAME
 
     # Check if group exists.
-    getent group $NAME &> /dev/null
+    getent group $NAME 1> /dev/null
     RETVAL=$?
     if [[ $RETVAL -eq 2 ]]
     then
