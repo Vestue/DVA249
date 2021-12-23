@@ -211,7 +211,17 @@ _user_attributes_change() {
     # Changing password triggers a special dialogue.
     if [[ $INPUT == "p" ]]
     then
-        passwd $USERNAME
+        passwd $USERNAME &> /dev/null
+        RETVAL=$?
+        if [[ $RETVAL -eq 0 ]]
+        then
+            echo "Password updated successfully!"
+        elif [[ $RETVAL -eq 10 ]]
+        then
+            echo "Password do not match. Try again."
+        else
+            echo "Failed to update password."
+        fi
         return 0
     fi
 
