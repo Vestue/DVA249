@@ -346,6 +346,8 @@ _directory_menu() {
     echo "${GREEN}d${reset} - Directory Delete   (Delete a directory)"
 }
 _directory_add(){
+    #Enter directory name, if name contains spaces they will be replaced to underscores
+
     _choice_custom_multiple "directory name"
 	read DIRECTORYNAME
 	NOSPACES=`echo $DIRECTORYNAME | sed 's/ /_/g'`
@@ -358,6 +360,11 @@ _directory_add(){
 		echo "Directory could not be created"
 	fi
 }
+
+# direc shows all folders in current directory, 
+# then a for-loop is used to search through all folders 
+# and see if one of them matches the users input. 
+# If it does it will show content if the folder the user searched for.
 _directory_list(){
 	direc=`ls -l | egrep "^d" | awk '{print $9}'`
 	direcexist=0
