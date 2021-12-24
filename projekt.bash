@@ -405,7 +405,7 @@ _directory_view(){
 
 	for i in $alldirec
 	do
-		if [ $DIRECTORY == $i ]
+		if [[ $DIRECTORY == $i ]]
 		then
 			echo -n "1. Owner: "
 			owner=`ls -l | grep "$DIRECTORY" | awk '{print $3}'`
@@ -419,7 +419,7 @@ _directory_view(){
 			echo -n "5. Sticky bit: "
 			sticky=`ls -l | grep "$DIRECTORY" | awk '{print $1}' | tail -c 2`
         fi
-		if [ $sticky == "t" ]
+		if [[ $sticky == "t" ]]
 		then
 			echo "Yes"
 		else
@@ -435,19 +435,16 @@ _directory_view(){
 	then
 		echo "There is no such directory"
 	fi
-
-	eval $1=$DIRECTORY
 }
 _directory_modify(){
 	direcexist=0
 	direcall=`ls -l | egrep "^d"`
-	moddir=''
 	echo "Which directory do you want to modify?"
-	view_direc moddir
+	_directory_view 
 
 	for i in $direcall
 	do
-		if [ $moddir == $i ]
+		if [ $DIRECTORY == $i ]
 		then
 			echo -e "\nWhich property do you want to modify?"
 			echo -n "Choice >"
@@ -458,13 +455,13 @@ _directory_modify(){
 				echo -n "Enter new directory owner >"
 				read OWN
 
-				chown $OWN $moddir
+				chown $OWN $DIRECTORY
 			elif [ $NUM == "2" ]
 			then
 				_group_list
 				echo -n "Enter new directory group >"
 				read GRP
-				chown :$GRP $moddir
+				chown :$GRP $DIRECTORY
 			elif [ $NUM == "3" ]
 			then
 				echo -n "Enter new groupID >"
@@ -486,25 +483,25 @@ _directory_modify(){
 					then
 						echo -n "User permissions >"
 						read per1
-						chmod u$per1 $moddir
+						chmod u$per1 $DIRECTORY
 
 					elif [ $PER == 2 ]
 					then
 						echo -n "Group permissions >"
 						read per2
-						chmod g$per2 $moddir
+						chmod g$per2 $DIRECTORY
 
 					elif [ $PER == 3 ]
 					then
 						echo -n "Others permission >"
 						read per3
-						chmod o$per3 $moddir
+						chmod o$per3 $DIRECTORY
 
 					elif [ $PER == 4 ]
 					then
 						echo -n "Permission for everyone >"
 						read per4
-						chmod a$per4 $moddir
+						chmod a$per4 $DIRECTORY
 
 					elif [ $PER == 0 ]
 					then
@@ -521,10 +518,10 @@ _directory_modify(){
 				read STICKY
 				if [ $STICKY == 1 ]
 				then
-					chmod +t $moddir
+					chmod +t $DIRECTORY
 				elif [ $STICKY == 0 ]
 				then
-					chmod -t $moddir
+					chmod -t $DIRECTORY
 				else
 					echo "Invalid input"
 				fi
