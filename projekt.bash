@@ -351,7 +351,9 @@ _directory_add(){
     _choice_custom_multiple "directory name"
 	read DIRECTORYNAME
 	NOSPACES=`echo $DIRECTORYNAME | sed 's/ /_/g'`
-	mkdir $NOSPACES
+
+    # Make a directory with 777 permissions
+	mkdir -m 777 $NOSPACES
 	RETVAL=$?
 	if [ $RETVAL ==  0 ]
 	then
@@ -394,9 +396,9 @@ _directory_delete(){
 
 	if [ $RETVAL == 0 ]
 	then
-		echo "The directory $DELETE has been deleted"
+		echo -e "\nThe directory $DELETE has been deleted."
 	else
-		echo "Directory could not be removed"
+		echo -e "\nDirectory could not be removed."
 	fi
 }
 _directory_view(){
@@ -410,27 +412,33 @@ _directory_view(){
 		if [[ $DIRECTORY == $i ]]
 		then
 			echo -n "1. Owner: "
-			owner=`ls -l | grep "$DIRECTORY" | awk '{print $3}'`
+			owner=`ls -l | grep "$DIRECTORY" | awk '{print $3}' | head -1`
 			echo $owner
-			echo -n "2. Groups: "
-			ls -l | grep "$DIRECTORY" | awk '{print $4}'
-			echo -n "3. GroupID: "
-			id -g $owner
-			echo -n "4. Permissions: "
-			ls -l | grep "$DIRECTORY" | awk '{print $1}'
-			echo -n "5. Sticky bit: "
+			
+            echo -n "2. Groups: "
+			GROUP=`ls -l | grep "$DIRECTORY" | awk '{print $4}' | head -1`
+            echo $GROUP
+			
+            echo -n "3. GroupID: "
+            getent group $GROUP | awk -F ":" '{print $3}'
+			
+            echo -n "4. Permissions: "
+			ls -l | grep "$DIRECTORY" | awk '{print $1}' | head -1
+			
+            echo -n "5. Sticky bit: "
 			sticky=`ls -l | grep "$DIRECTORY" | awk '{print $1}' | tail -c 2`
+		    if [[ $sticky == "t" ]]
+		    then
+		    	echo "Yes"
+		    else
+			    echo "No"
+		    fi
+		    
+            echo -n "6. Last Modified: "
+		    ls -l | grep "$DIRECTORY" | awk '{print $6,$7,$8}' | head -1
+		    
+            direcexist=1
         fi
-		if [[ $sticky == "t" ]]
-		then
-			echo "Yes"
-		else
-
-			echo "No"
-		fi
-		echo -n "6. Last Modified: "
-		ls -l | grep "$DIRECTORY" | awk '{print $6,$7,$8}'
-		direcexist=1
 	done
 
 	if [ $direcexist == 0 ]
@@ -444,11 +452,17 @@ _directory_modify(){
     _choice_custom_multiple "directory to modify"
 	_directory_view 
 
+    if [[ $direcexist == 0 ]]
+    then
+	    echo "There is no such directory"
+        return;
+    fi
+
 	for i in $direcall
 	do
 		if [ $DIRECTORY == $i ]
 		then
-            -_choice_custom_multiple "property to modify"
+            _choice_custom_multiple "property to modify"
 			read NUM
 			if [ $NUM == "1" ]
 			then
@@ -528,13 +542,8 @@ _directory_modify(){
 			else
 			echo "Invalid input"
 			fi
-		direcexist=1
 		fi
 	done
-    if [$direcexist == 0]
-    then
-	    echo "There is no such directory"
-    fi
 }
 
 ######################
@@ -885,7 +894,7 @@ _choice_multiple() {
     echo -en 'Enter choice: \n\n'
 }
 _choice_custom_multiple() {
-    # Show a custom message to be used by different functionss
+    # Show a custom message to be used by different functions.
     echo "------------------------------------------------------"
     echo -en "Enter $1: \n\n"
 }
