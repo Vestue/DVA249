@@ -130,16 +130,13 @@ _user_menu() {
     echo "${RED}d${reset} - User Delete    (Delete a login user)"
 }
 _user_create() {
-    echo "Enter full name of user: "
-    _choice_multiple
+    _choice_custom_multiple "full name of user"
     read FULLNAME
     
-    echo "Enter username of user: "
-    _choice_multiple
+    _choice_custom_multiple "username of user"
     read USERNAME
     
-    echo "Enter password of user: "
-    _choice_multiple
+    _choice_custom_multiple "password of user"
     read -s PASSWORD
     
     useradd $USERNAME -c $FULLNAME -md /home/$USERNAME -s /bin/bash -p $PASSWORD
@@ -290,8 +287,7 @@ _user_remove() {
     fi
 }
 _user_ask_which() {
-    echo 'Enter username:'
-    _choice_multiple
+    _choice_custom_multiple "username"
 }
 
 ######################
@@ -783,8 +779,7 @@ _group_remove() {
     fi
 }
 _group_ask_which() {
-    echo 'Enter name of group:'
-    _choice_multiple
+    _choice_multiple "name of group"
 }
 
 ######################
@@ -869,20 +864,26 @@ _network_interfaces() {
 _hold() {
     # Wait for user input before continuing to next step.
     echo "------------------------------------------------------"
-    echo -en 'Press any key to continue..\n\n'
+    echo -en "Press any key to continue..\n\n"
     read -sn1 INPUT
 }
 _choice_single() {
     # Let the user make a single choice and then instantly move to next step.
     echo "------------------------------------------------------"
     echo "(q - Quit, b - Back)"
-    echo -en 'Enter choice: \n\n'
-    read -sn1 INPUT
+    echo -en "Enter choice: "
+    read -n1 INPUT
+    echo -e "\n"
 }
 _choice_multiple() {
     # Let the user enter a full string.
     echo "------------------------------------------------------"
     echo -en 'Enter choice: \n\n'
+}
+_choice_custom_multiple() {
+    # Show a custom message to be used by different functionss
+    echo "------------------------------------------------------"
+    echo -en "Enter $1: \n\n"
 }
 
 # Main is called at the end, causing the order of the functions to not matter.
