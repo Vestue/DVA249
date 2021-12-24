@@ -346,7 +346,7 @@ _directory_menu() {
     echo "${GREEN}d${reset} - Directory Delete   (Delete a directory)"
 }
 _directory_add(){
-	echo -n "Enter directory name >"
+    _choice_custom_multiple "directory name"
 	read DIRECTORYNAME
 	NOSPACES=`echo $DIRECTORYNAME | sed 's/ /_/g'`
 	mkdir $NOSPACES
@@ -361,7 +361,7 @@ _directory_add(){
 _directory_list(){
 	direc=`ls -l | egrep "^d" | awk '{print $9}'`
 	direcexist=0
-	echo -n "Enter directory to list >"
+    _choice_custom_multiple "directory to list"
 	read SEARCH
 
 	for i in $direc
@@ -378,10 +378,10 @@ _directory_list(){
 	fi
 }
 _directory_delete(){
-	echo -n "Enter directory to delete >"
+    _choice_custom_multiple "directory to delete"
 	read DELETE
 
-	rm -r $DELETE 2>Err.log
+	rm -r $DELETE 2> err.log
 
 	RETVAL=$?
 
@@ -395,8 +395,7 @@ _directory_delete(){
 _directory_view(){
 	alldirec=`ls -l | egrep "^d"`
 	direcexist=0
-	echo  "Enter directory"
-	echo -n "Choice >"
+    _choice_custom_multiple "directory"
 	read DIRECTORY
 
 	for i in $alldirec
@@ -435,32 +434,31 @@ _directory_view(){
 _directory_modify(){
 	direcexist=0
 	direcall=`ls -l | egrep "^d"`
-	echo "Which directory do you want to modify?"
+    _choice_custom_multiple "directory to modify"
 	_directory_view 
 
 	for i in $direcall
 	do
 		if [ $DIRECTORY == $i ]
 		then
-			echo -e "\nWhich property do you want to modify?"
-			echo -n "Choice >"
+            -_choice_custom_multiple "property to modify"
 			read NUM
 			if [ $NUM == "1" ]
 			then
 				_user_list
-				echo -n "Enter new directory owner >"
+                _choice_custom_multiple "new directory owner"
 				read OWN
 
 				chown $OWN $DIRECTORY
 			elif [ $NUM == "2" ]
 			then
 				_group_list
-				echo -n "Enter new directory group >"
+                _choice_custom_multiple "new directory group"
 				read GRP
 				chown :$GRP $DIRECTORY
 			elif [ $NUM == "3" ]
 			then
-				echo -n "Enter new groupID >"
+                _choice_custom_multiple "new group ID"
 				read $NEWID
 				groupmod -g $NEWID $owner
 			elif [ $NUM == "4" ]
@@ -510,12 +508,11 @@ _directory_modify(){
 			elif [ $NUM == "5" ]
 			then
 				echo "Press 1 for stickybit and 0 for regular"
-				echo -n "choice >"
-				read STICKY
-				if [ $STICKY == 1 ]
+                _choice_single
+				if [ $INPUT == 1 ]
 				then
 					chmod +t $DIRECTORY
-				elif [ $STICKY == 0 ]
+				elif [ $INPUT == 0 ]
 				then
 					chmod -t $DIRECTORY
 				else
@@ -527,11 +524,11 @@ _directory_modify(){
 		direcexist=1
 		fi
 	done
+    if [$direcexist == 0]
+    then
+	    echo "There is no such directory"
+    fi
 }
-if [$direcexist == 0]
-then
-	echo "There is no such directory"
-fi
 
 ######################
 #       GROUPS      #
