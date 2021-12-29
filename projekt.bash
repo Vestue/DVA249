@@ -46,12 +46,10 @@ _main() {
                 _network_menu
                 ;;
             b)
-                echo 'Exiting program… '
-                CONTINUE=0
+                _exit_program
                 ;;
             q)
-                echo 'Exiting program… '
-                CONTINUE=0
+                _exit_program
                 ;;
             *)
                 echo “Wrong input: $INPUT. Try again.”
@@ -109,8 +107,7 @@ _user() {
                 RUNUSR=0
                 ;;
             q)
-                echo 'Exiting program.. '
-                CONTINUE=0
+                _exit_program
                 RUNUSR=0
                 ;;
             *)
@@ -257,8 +254,7 @@ _user_attributes_change() {
             return 1
             ;;
         q)
-            echo 'Exiting program..'
-            CONTINUE=0
+            _exit_program
             return 2
             ;;
         *)
@@ -324,8 +320,7 @@ _directory() {
                 RUNDIR=0
                 ;;
             q)
-                echo 'Exiting program…'
-                CONTINUE=0
+                _exit_program
                 RUNDIR=0
                 ;;
             *)
@@ -347,14 +342,17 @@ _directory_menu() {
 _directory_add(){
     #Enter directory name, if name contains spaces they will be replaced to underscores
 
+    echo "Select where new directory should be added."
     _directory_list
 
     _choice_custom_multiple "directory name"
 	read DIRECTORYNAME
 	NOSPACES=`echo $DIRECTORYNAME | sed 's/ /_/g'`
+    CURDIR=`pwd`
+    FULLPATH="$CURDIR/$NOSPACES"
 
     # Make a directory with 777 permissions
-	mkdir -m 777 $NOSPACES
+	mkdir -m 777 $FULLPATH
 	RETVAL=$?
 	if [ $RETVAL ==  0 ]
 	then
@@ -370,7 +368,6 @@ _directory_add(){
 # and see if one of them matches the users input. 
 # If it does it will show content if the folder the user searched for.
 _directory_list(){
-	direcexist=0
 	go=0
 	currentDir=`pwd`
 
@@ -400,12 +397,18 @@ _directory_list(){
         then
             go=1
 	    else
-	        cd $SEARCH
+	        cd $SEARCH 2> /dev/null
+            RETVAL=$?
+            if [[ $RETVAL -ne 0 ]]
+            then
+                echo -e "\nDirectory does not exist. Try again."
+                _hold
+            fi
 	    fi
 	done
 }
 _directory_delete(){
-    echo "Choose directory in which you want to delete a folder"
+    echo "Choose directory in which you want to delete a folder."
     _directory_list
     _choice_custom_multiple "directory to delete"
 	read DELETE
@@ -423,8 +426,7 @@ _directory_delete(){
     cd $currentDir
 }
 _directory_view(){
-	direcexist=0
-	echo "Choose directory to view properties of folder in "
+	echo "Choose directory to view properties of folder in."
     _directory_list
 
     # Permissions of the directory
@@ -535,218 +537,268 @@ _directory_view(){
     
     echo -n "5. Last Opened: "
     echo $DIRECTORY | awk '{print $6,$7,$8}' | head -1
-    
-    direcexist=1
 }
 _directory_modify(){
-	direcexist=0
     _choice_custom_multiple "directory to modify"
 	_directory_view 
-	direcall=`ls -l | egrep "^d"`
 
-    if [[ $direcexist == 0 ]]
-    then
-	    echo "There is no such directory"
-        return;
-    fi
+    echo -e "\nWhich property do you want to modify?"
+    _choice_single
+    RUNDIRMOD=1
 
-	for i in $direcall
-	do
-		if [ $DIRECTORY == $i ]
-		then
-			echo -e "\nWhich property do you want to modify?"
-			_choice_single
-
-			if [ $INPUT == "1" ]
-			then
-				_user_list
-                _choice_custom_multiple "new directory owner"
-				read OWN
-				chown $OWN $DIRECTORY
-			elif [ $INPUT == "2" ]
-			then
-				_group_list
-                _choice_custom_multiple "new directory group"
-				read GRP
-				chown :$GRP $DIRECTORY
-			elif [ $INPUT == "3" ]
-			then
-				RUN=1
-				while [[ $RUN -eq 1 ]]
-				do
-					echo -e "u. User\ng. Groups\no. Others\na. All\nq. Exit\n\n"
-					echo "What permission do you want to edit?"
-                    _choice_single
-
-					if [ $INPUT == "u" ]
-					then
-						echo "1. User can only Read"
-						echo "2. User can Read and Write"
-						echo "3. User can only Write"
-						echo "4. User can Write and Execute"
-						echo "5. User can only Execute"
-						echo "6. User can Read and Execute"
-						echo "7. User can Read, Write and Execute"
-                        _choice_single
-						chmod u-wrx $moddir
-
-						if [ $INPUT == "1" ]
-						then
-						    chmod u+r $moddir
-						elif [ $INPUT == "2" ]
-						then
-						    chmod u+rw $moddir
-						elif [ $INPUT == "3" ]
-						then
-						    chmod u+w $moddir
-						elif [ $INPUT == "4" ]
-						then
-						    chmod u+wx $moddir
-						elif [ $INPUT == "5" ]
-						then
-						    chmod u+x $moddir
-						elif [ $INPUT == "6" ]
-						then
-						    chmod u+rx $moddir
-						elif [ $INPUT == "7" ]
-						then
-						    chmod u+rwx $moddir
-						else
-						    echo "Invalid input"
-						fi
-					elif [ $INPUT == "g" ]
-					then
-						echo "1. Group can only Read"
-						echo "2. Group can Read and Write"
-						echo "3. Group can only Write"
-						echo "4. Group can Write and Execute"
-						echo "5. Group can only Execute"
-						echo "6. Group can Read and Execute"
-						echo "7. Group can Read, Write and Execute"
-						_choice_single
-						chmod g-wrx $moddir
-
-						if [ $INPUT == "1" ]
-						then
-						    chmod g+r $moddir
-						elif [ $INPUT == "2" ]
-						then
-						    chmod g+rw $moddir
-						elif [ $INPUT == "3" ]
-						then
-						    chmod g+w $moddir
-						elif [ $INPUT == "4" ]
-						then
-    						chmod g+wx $moddir
-						elif [ $INPUT == "5" ]
-						then
-						    chmod g+x $moddir
-						elif [ $INPUT == "6" ]
-						then
-						    chmod g+rx $moddir
-						elif [ $INPUT == "7" ]
-						then
-						    chmod g+rwx $moddir
-						else
-						    echo "Invalid input"
-						fi
-					elif [ $INPUT == "o" ]
-					then
-						echo "1. Others can only Read"
-						echo "2. Others can Read and Write"
-						echo "3. Others can only Write"
-						echo "4. Others can Write and Execute"
-						echo "5. Others can only Execute"
-						echo "6. Others can Read and Execute"
-						echo "7. Others can Read, Write and Execute"
-                        _choice_single
-						chmod o-wrx $moddir
-
-						if [ $INPUT == "1" ]
-						then
-						    chmod o+r $moddir
-						elif [ $INPUT == "2" ]
-						then
-						    chmod o+rw $moddir
-						elif [ $INPUT == "3" ]
-						then
-						    chmod o+w $moddir
-						elif [ $INPUT == "4" ]
-						then
-						    chmod o+wx $moddir
-						elif [ $INPUT == "5" ]
-						then
-						    chmod o+x $moddir
-						elif [ $INPUT == "6" ]
-						then
-						    chmod o+rx $moddir
-						elif [ $INPUT == "7" ]
-						then
-					        chmod o+rwx $moddir
-						else
-						    echo "Invalid input"
-						fi
-					elif [ $INPUT == "a" ]
-					then
-						echo "1. Everyone can only Read"
-						echo "2. Everyone can Read and Write"
-						echo "3. Everyone can only Write"
-						echo "4. Everyone can Write and Execute"
-						echo "5. Everyone can only Execute"
-						echo "6. Everyone can Read and Execute"
-						echo "7. Everyone can Read, Write and Execute"
-                        _choice_single
-						chmod a-wrx $moddir
-
-						if [ $INPUT == "1" ]
-						then
-						    chmod a+r $moddir
-						elif [ $INPUT == "2" ]
-						then
-						    chmod a+rw $moddir
-						elif [ $INPUT == "3" ]
-						then
-						    chmod a+w $moddir
-						elif [ $INPUT == "4" ]
-						then
-						    chmod a+wx $moddir
-						elif [ $INPUT == "5" ]
-						then
-						    chmod a+x $moddir
-						elif [ $INPUT == "6" ]
-						then
-						    chmod a+rx $moddir
-						elif [ $INPUT == "7" ]
-						then
-						    chmod a+rwx $moddir
-						else
-						    echo "Invalid input"
-						fi
-					elif [ $INPUT == "q" ]
-					then
-						RUN=0
-					else
-					echo "Invalid input"
-					fi
-				done
-			elif [ $INPUT == "4" ]
-			then
-				echo "Press 1 for stickybit and 0 for regular"
+    while [[ $RUNDIRMOD -eq 1 ]]
+    do
+        if [ $INPUT == "1" ]
+        then
+            _user_list
+            _choice_custom_multiple "new directory owner"
+            read OWN
+            chown $OWN $DIRECTORY
+        elif [ $INPUT == "2" ]
+        then
+            _group_list
+            _choice_custom_multiple "new directory group"
+            read GRP
+            chown :$GRP $DIRECTORY
+        elif [ $INPUT == "3" ]
+        then
+            RUN=1
+            while [[ $RUN -eq 1 ]]
+            do
+                echo -e "u. User\ng. Groups\no. Others\na. All\n\n"
+                echo "What permission do you want to edit?"
                 _choice_single
-				if [ $INPUT == 1 ]
-				then
-					chmod +t $DIRECTORY
-				elif [ $INPUT == 0 ]
-				then
-					chmod -t $DIRECTORY
-				else
-					echo "Invalid input"
-				fi
-			else
-			    echo "Invalid input"
-			fi
-		fi
-	done
+
+                if [ $INPUT == "u" ]
+                then
+                    echo "1. User can only Read"
+                    echo "2. User can Read and Write"
+                    echo "3. User can only Write"
+                    echo "4. User can Write and Execute"
+                    echo "5. User can only Execute"
+                    echo "6. User can Read and Execute"
+                    echo "7. User can Read, Write and Execute"
+                    _choice_single
+                    chmod u-wrx $moddir
+
+                    if [ $INPUT == "1" ]
+                    then
+                        chmod u+r $moddir
+                    elif [ $INPUT == "2" ]
+                    then
+                        chmod u+rw $moddir
+                    elif [ $INPUT == "3" ]
+                    then
+                        chmod u+w $moddir
+                    elif [ $INPUT == "4" ]
+                    then
+                        chmod u+wx $moddir
+                    elif [ $INPUT == "5" ]
+                    then
+                        chmod u+x $moddir
+                    elif [ $INPUT == "6" ]
+                    then
+                        chmod u+rx $moddir
+                    elif [ $INPUT == "7" ]
+                    then
+                        chmod u+rwx $moddir
+                    elif [ $INPUT == "b" ]
+                    then
+                        # Move along
+                        RUN=0
+                    elif [ $INPUT == "q" ]
+                    then
+                        _exit_program
+                        RUNDIR=0
+                        RUNDIRMOD=0
+                        RUN=0
+                    else
+                        echo "Invalid input"
+                        _hold
+                    fi
+                elif [ $INPUT == "g" ]
+                then
+                    echo "1. Group can only Read"
+                    echo "2. Group can Read and Write"
+                    echo "3. Group can only Write"
+                    echo "4. Group can Write and Execute"
+                    echo "5. Group can only Execute"
+                    echo "6. Group can Read and Execute"
+                    echo "7. Group can Read, Write and Execute"
+                    _choice_single
+                    chmod g-wrx $moddir
+
+                    if [ $INPUT == "1" ]
+                    then
+                        chmod g+r $moddir
+                    elif [ $INPUT == "2" ]
+                    then
+                        chmod g+rw $moddir
+                    elif [ $INPUT == "3" ]
+                    then
+                        chmod g+w $moddir
+                    elif [ $INPUT == "4" ]
+                    then
+                        chmod g+wx $moddir
+                    elif [ $INPUT == "5" ]
+                    then
+                        chmod g+x $moddir
+                    elif [ $INPUT == "6" ]
+                    then
+                        chmod g+rx $moddir
+                    elif [ $INPUT == "7" ]
+                    then
+                        chmod g+rwx $moddir
+                    elif [ $INPUT == "b" ]
+                    then
+                        # Move along
+                        RUN=0
+                    elif [ $INPUT == "q" ]
+                    then
+                        _exit_program
+                        RUNDIR=0
+                        RUNDIRMOD=0
+                        RUN=0
+                    else
+                        echo "Invalid input"
+                        _hold
+                    fi
+                elif [ $INPUT == "o" ]
+                then
+                    echo "1. Others can only Read"
+                    echo "2. Others can Read and Write"
+                    echo "3. Others can only Write"
+                    echo "4. Others can Write and Execute"
+                    echo "5. Others can only Execute"
+                    echo "6. Others can Read and Execute"
+                    echo "7. Others can Read, Write and Execute"
+                    _choice_single
+                    chmod o-wrx $moddir
+
+                    if [ $INPUT == "1" ]
+                    then
+                        chmod o+r $moddir
+                    elif [ $INPUT == "2" ]
+                    then
+                        chmod o+rw $moddir
+                    elif [ $INPUT == "3" ]
+                    then
+                        chmod o+w $moddir
+                    elif [ $INPUT == "4" ]
+                    then
+                        chmod o+wx $moddir
+                    elif [ $INPUT == "5" ]
+                    then
+                        chmod o+x $moddir
+                    elif [ $INPUT == "6" ]
+                    then
+                        chmod o+rx $moddir
+                    elif [ $INPUT == "7" ]
+                    then
+                        chmod o+rwx $moddir
+                    elif [ $INPUT == "b" ]
+                    then
+                        # Move along
+                        RUN=0
+                    elif [ $INPUT == "q" ]
+                    then
+                        _exit_program
+                        RUNDIR=0
+                        RUNDIRMOD=0
+                        RUN=0
+                    else
+                        echo "Invalid input"
+                        _hold
+                    fi
+                elif [ $INPUT == "a" ]
+                then
+                    echo "1. Everyone can only Read"
+                    echo "2. Everyone can Read and Write"
+                    echo "3. Everyone can only Write"
+                    echo "4. Everyone can Write and Execute"
+                    echo "5. Everyone can only Execute"
+                    echo "6. Everyone can Read and Execute"
+                    echo "7. Everyone can Read, Write and Execute"
+                    _choice_single
+                    chmod a-wrx $moddir
+
+                    if [ $INPUT == "1" ]
+                    then
+                        chmod a+r $moddir
+                    elif [ $INPUT == "2" ]
+                    then
+                        chmod a+rw $moddir
+                    elif [ $INPUT == "3" ]
+                    then
+                        chmod a+w $moddir
+                    elif [ $INPUT == "4" ]
+                    then
+                        chmod a+wx $moddir
+                    elif [ $INPUT == "5" ]
+                    then
+                        chmod a+x $moddir
+                    elif [ $INPUT == "6" ]
+                    then
+                        chmod a+rx $moddir
+                    elif [ $INPUT == "7" ]
+                    then
+                        chmod a+rwx $moddir
+                    elif [ $INPUT == "b" ]
+                    then
+                        # Move along
+                        RUN=0
+                    elif [ $INPUT == "q" ]
+                    then
+                        _exit_program
+                        RUNDIR=0
+                        RUNDIRMOD=0
+                        RUN=0
+                    else
+                        echo "Invalid input"
+                        _hold
+                    fi
+                elif [ $INPUT == "b" ]
+                then
+                    RUN=0
+                elif [ $INPUT == "q" ]
+                then
+                    _exit_program
+                    RUNDIR=0
+                    RUNDIRMOD=0
+                    RUN=0
+                else
+                    echo "Invalid input"
+                    _hold
+                fi
+            done
+        elif [ $INPUT == "4" ]
+        then
+            echo "Press 1 for stickybit and 0 for regular"
+            _choice_single
+            if [ $INPUT == 1 ]
+            then
+                chmod +t $DIRECTORY
+            elif [ $INPUT == 0 ]
+            then
+                chmod -t $DIRECTORY
+            else
+                echo "Invalid input"
+                _hold
+            fi
+            _hold
+        elif [ $INPUT == "b" ]
+        then
+            RUNDIRMOD=0
+        elif [ $INPUT == "q" ]
+        then
+            _exit_program
+            RUNDIR=0
+            RUNDIRMOD=0
+        else
+            echo "Invalid input"
+            _hold
+        fi
+    done
 }
 
 ######################
@@ -783,8 +835,7 @@ _group() {
                 RUNGRP=0
                 ;;
             q)
-                echo “Exiting…”
-                CONTINUE=0
+                _exit_program
                 RUNGRP=0
                 ;;
             *)
@@ -873,8 +924,7 @@ _group_modify() {
                 RUNGRPMOD=0
                 ;;
             q)
-                echo "Exiting.."
-                CONTINUE=0
+                _exit_program
                 RUNGRP=0
                 RUNGRPMOD=0
                 ;;
@@ -982,8 +1032,7 @@ _group_remove() {
                 echo "Primary group $NAME has been deleted."
             elif [[ $INPUT == "q" ]]
             then
-                echo 'Exiting program..'
-                CONTINUE=0
+                _exit_program
             else
                 echo 'Exiting.. '
             fi
@@ -1094,12 +1143,16 @@ _choice_single() {
 _choice_multiple() {
     # Let the user enter a full string.
     echo "------------------------------------------------------"
-    echo -en 'Enter choice: \n\n'
+    echo -en 'Enter choice: '
 }
 _choice_custom_multiple() {
     # Show a custom message to be used by different functions.
     echo "------------------------------------------------------"
-    echo -en "Enter $1: \n\n"
+    echo -en "Enter $1: "
+}
+_exit_program() {
+    echo “Exiting program… ”
+    CONTINUE=0
 }
 
 # Main is called at the end, causing the order of the functions to not matter.
