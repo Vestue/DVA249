@@ -307,7 +307,6 @@ _directory() {
                 ;;
             l)
                 _directory_list
-                _hold
                 ;;
             v)
                 _directory_view
@@ -348,6 +347,8 @@ _directory_menu() {
 _directory_add(){
     #Enter directory name, if name contains spaces they will be replaced to underscores
 
+    _directory_list
+
     _choice_custom_multiple "directory name"
 	read DIRECTORYNAME
 	NOSPACES=`echo $DIRECTORYNAME | sed 's/ /_/g'`
@@ -361,6 +362,7 @@ _directory_add(){
 	else
 		echo "Directory could not be created"
 	fi
+    cd $currentDir
 }
 
 # direc shows all folders in current directory, 
@@ -368,25 +370,43 @@ _directory_add(){
 # and see if one of them matches the users input. 
 # If it does it will show content if the folder the user searched for.
 _directory_list(){
-	direc=`ls -l | egrep "^d" | awk '{print $9}'`
 	direcexist=0
-    _choice_custom_multiple "directory to list"
-	read SEARCH
+	go=0
+	currentDir=`pwd`
 
-	for i in $direc
+	while [ $go == "0" ]
 	do
-		if [ $i == $SEARCH ]
-		then
-			ls $i
-			direcexist=1
-		fi
+	    echo "------------------------------------------------------"
+	    echo -e "\nCurrent Directory contains: "
+	    direc=`ls -l |  awk '{print $9}' | sed "s/ /\n/g"`
+	    echo "$direc"
+	    echo -e "\n------------------------------------------------------"
+	    echo -n "Current Directory: "
+	    pwd
+	    echo "------------------------------------------------------"
+	    echo -e "(b - Go back to previous directory, q - quit, s - select directory)"
+	    
+        # Let the user enter directory
+        _choice_multiple
+	    read SEARCH
+
+	    if [ $SEARCH == "b" ]
+	    then	
+	        cd ..
+	    elif [ $SEARCH == "q" ]
+	    then
+	        go=1
+        elif [ $SEARCH == "s" ]
+        then
+            go=1
+	    else
+	        cd $SEARCH
+	    fi
 	done
-	if [ $direcexist == 0 ]
-	then
-		echo "There is no such directory"
-	fi
 }
 _directory_delete(){
+    echo "Choose directory in which you want to delete a folder"
+    _directory_list
     _choice_custom_multiple "directory to delete"
 	read DELETE
 
@@ -400,57 +420,129 @@ _directory_delete(){
 	else
 		echo -e "\nDirectory could not be removed."
 	fi
+    cd $currentDir
 }
 _directory_view(){
-	alldirec=`ls -l | egrep "^d"`
 	direcexist=0
-    _choice_custom_multiple "directory"
-	read DIRECTORY
+	echo "Choose directory to view properties of folder in "
+    _directory_list
 
-	for i in $alldirec
-	do
-		if [[ $DIRECTORY == $i ]]
-		then
-			echo -n "1. Owner: "
-			owner=`ls -l | grep "$DIRECTORY" | awk '{print $3}' | head -1`
-			echo $owner
+    # Permissions of the directory
+    CURDIR=`pwd`
+	DIRECTORY=`ls -la $CURDIR | head -2 | tail -1`
+    
+    echo -n "1. Owner: "
+    owner=`echo $DIRECTORY | awk '{print $3}'`
+    echo $owner
 			
-            echo -n "2. Groups: "
-			GROUP=`ls -l | grep "$DIRECTORY" | awk '{print $4}' | head -1`
-            echo $GROUP
-			
-            echo -n "3. GroupID: "
-            getent group $GROUP | awk -F ":" '{print $3}'
-			
-            echo -n "4. Permissions: "
-			ls -l | grep "$DIRECTORY" | awk '{print $1}' | head -1
-			
-            echo -n "5. Sticky bit: "
-			sticky=`ls -l | grep "$DIRECTORY" | awk '{print $1}' | tail -c 2`
-		    if [[ $sticky == "t" ]]
-		    then
-		    	echo "Yes"
-		    else
-			    echo "No"
-		    fi
-		    
-            echo -n "6. Last Modified: "
-		    ls -l | grep "$DIRECTORY" | awk '{print $6,$7,$8}' | head -1
-		    
-            direcexist=1
-        fi
-	done
+    echo -n "2. Groups: "
+    GROUP=`echo $DIRECTORY | awk '{print $4}'`
+    GROUPID=`getent group $GROUP | awk -F ":" '{print $3}'`
+    echo "$GROUP ($GROUPID)"
 
-	if [ $direcexist == 0 ]
-	then
-		echo "There is no such directory"
-	fi
+    echo -ne "3. Permissions: \n"
+    userP=`getfacl -p $CURDIR | egrep "^u" | sed "s/:/ /g" | awk '{print $2}'`
+    grpP=`getfacl -p $CURDIR | egrep "^g" | sed "s/:/ /g" | awk '{print $2}'`
+    other=`getfacl -p $CURDIR | egrep "^o" | sed "s/:/ /g" | awk '{print $2}'`
+    
+    # MÅSTE ÄVEN TESTA FÖR SETUID, SETGID och STICKY
+    # De räknas som exekverbara då
+
+    # User permissions
+    if [ $userP == "r--" ]
+    then
+        echo -e "User Permission: Read only"
+    elif [ $userP == "rw-" ]
+    then
+        echo -e "User Permission: Read and Write"
+    elif [ $userP == "rwx" ]
+    then
+        echo -e "User Permission: Read, Write and Execute"
+    elif [ $userP == "-w-" ]
+    then
+        echo -e "User Permission: Write only"
+    elif [ $userP == "-wx" ]
+    then
+        echo -e "User Permission: Write and Execute"
+    elif [ $userP == "r-x" ]
+    then
+        echo -e "User Permission: Read and Execute"
+    elif [ $userP == "--x" ]
+    then
+        echo -e "User Permission: Execute Only"
+    else
+        echo -e "User has no permissions"
+    fi
+
+    # Group permissions
+    if [ $grpP == "r--" ]
+    then
+        echo -e "Group Permission: Read only"
+    elif [ $grpP == "rw-" ]
+    then
+        echo -e "Group Permission: Read and Write"
+    elif [ $grpP == "rwx" ]
+    then
+        echo -e "Group Permission: Read, Write and Execute"
+    elif [ $grpP == "-w-" ]
+    then
+        echo -e "Group Permission: Write only"
+    elif [ $grpP == "-wx" ]
+    then
+        echo -e "Group Permission: Write and Execute"
+    elif [ $grpP == "r-x" ]
+    then
+        echo -e "Group Permission: Read and Execute"
+    elif [ $grpP == "--x" ]
+    then
+        echo -e "Group Permission: Execute Only"
+    else echo -e "Group has no permissions"
+    fi
+
+    # Others permissions
+    if [ $other == "r--" ]
+    then
+        echo -e "Others Permission: Read only"
+    elif [ $other == "rw-" ]
+    then
+        echo -e "Others Permission: Read and Write"
+    elif [ $other == "rwx" ]
+    then
+        echo -e "Others Permission: Read, Write and Execute"
+    elif [ $other == "-w-" ]
+    then
+        echo -e "Others Permission: Write only"
+    elif [ $other == "-wx" ]
+    then
+        echo -e "Others Permission: Write and Execute"
+    elif [ $other == "r-x" ]
+    then
+        echo -e "Others Permission: Read and Execute"
+    elif [ $other == "--x" ]
+    then
+        echo -e "Others Permission: Execute Only"
+    else echo -e "Others has no permissions"
+    fi
+
+    echo -n "4. Sticky bit: "
+    sticky=`echo $DIRECTORY | awk '{print $1}' | tail -c 2`
+    if [[ $sticky == "t" ]]
+    then
+        echo "Yes"
+    else
+        echo "No"
+    fi
+    
+    echo -n "5. Last Opened: "
+    echo $DIRECTORY | awk '{print $6,$7,$8}' | head -1
+    
+    direcexist=1
 }
 _directory_modify(){
 	direcexist=0
-	direcall=`ls -l | egrep "^d"`
     _choice_custom_multiple "directory to modify"
 	_directory_view 
+	direcall=`ls -l | egrep "^d"`
 
     if [[ $direcexist == 0 ]]
     then
@@ -462,71 +554,182 @@ _directory_modify(){
 	do
 		if [ $DIRECTORY == $i ]
 		then
-            _choice_custom_multiple "property to modify"
-			read NUM
-			if [ $NUM == "1" ]
+			echo -e "\nWhich property do you want to modify?"
+			_choice_single
+
+			if [ $INPUT == "1" ]
 			then
 				_user_list
                 _choice_custom_multiple "new directory owner"
 				read OWN
-
 				chown $OWN $DIRECTORY
-			elif [ $NUM == "2" ]
+			elif [ $INPUT == "2" ]
 			then
 				_group_list
                 _choice_custom_multiple "new directory group"
 				read GRP
 				chown :$GRP $DIRECTORY
-			elif [ $NUM == "3" ]
-			then
-                _choice_custom_multiple "new group ID"
-				read $NEWID
-				groupmod -g $NEWID $owner
-			elif [ $NUM == "4" ]
+			elif [ $INPUT == "3" ]
 			then
 				RUN=1
 				while [[ $RUN -eq 1 ]]
 				do
-					echo -e "1. User\n2. Groups\n3. Others\n4. All\n 0. Exit\n\n"
-					echo "Type 'w' for write, 'r' for read and 'x' for execute"
-					echo "type - or + before the letters inorder to add or remove"
+					echo -e "u. User\ng. Groups\no. Others\na. All\nq. Exit\n\n"
 					echo "What permission do you want to edit?"
-					echo -n "choice >"
-					read PER
+                    _choice_single
 
-					if [ $PER == 1 ]
+					if [ $INPUT == "u" ]
 					then
-						echo -n "User permissions >"
-						read per1
-						chmod u$per1 $DIRECTORY
+						echo "1. User can only Read"
+						echo "2. User can Read and Write"
+						echo "3. User can only Write"
+						echo "4. User can Write and Execute"
+						echo "5. User can only Execute"
+						echo "6. User can Read and Execute"
+						echo "7. User can Read, Write and Execute"
+                        _choice_single
+						chmod u-wrx $moddir
 
-					elif [ $PER == 2 ]
+						if [ $INPUT == "1" ]
+						then
+						    chmod u+r $moddir
+						elif [ $INPUT == "2" ]
+						then
+						    chmod u+rw $moddir
+						elif [ $INPUT == "3" ]
+						then
+						    chmod u+w $moddir
+						elif [ $INPUT == "4" ]
+						then
+						    chmod u+wx $moddir
+						elif [ $INPUT == "5" ]
+						then
+						    chmod u+x $moddir
+						elif [ $INPUT == "6" ]
+						then
+						    chmod u+rx $moddir
+						elif [ $INPUT == "7" ]
+						then
+						    chmod u+rwx $moddir
+						else
+						    echo "Invalid input"
+						fi
+					elif [ $INPUT == "g" ]
 					then
-						echo -n "Group permissions >"
-						read per2
-						chmod g$per2 $DIRECTORY
+						echo "1. Group can only Read"
+						echo "2. Group can Read and Write"
+						echo "3. Group can only Write"
+						echo "4. Group can Write and Execute"
+						echo "5. Group can only Execute"
+						echo "6. Group can Read and Execute"
+						echo "7. Group can Read, Write and Execute"
+						_choice_single
+						chmod g-wrx $moddir
 
-					elif [ $PER == 3 ]
+						if [ $INPUT == "1" ]
+						then
+						    chmod g+r $moddir
+						elif [ $INPUT == "2" ]
+						then
+						    chmod g+rw $moddir
+						elif [ $INPUT == "3" ]
+						then
+						    chmod g+w $moddir
+						elif [ $INPUT == "4" ]
+						then
+    						chmod g+wx $moddir
+						elif [ $INPUT == "5" ]
+						then
+						    chmod g+x $moddir
+						elif [ $INPUT == "6" ]
+						then
+						    chmod g+rx $moddir
+						elif [ $INPUT == "7" ]
+						then
+						    chmod g+rwx $moddir
+						else
+						    echo "Invalid input"
+						fi
+					elif [ $INPUT == "o" ]
 					then
-						echo -n "Others permission >"
-						read per3
-						chmod o$per3 $DIRECTORY
+						echo "1. Others can only Read"
+						echo "2. Others can Read and Write"
+						echo "3. Others can only Write"
+						echo "4. Others can Write and Execute"
+						echo "5. Others can only Execute"
+						echo "6. Others can Read and Execute"
+						echo "7. Others can Read, Write and Execute"
+                        _choice_single
+						chmod o-wrx $moddir
 
-					elif [ $PER == 4 ]
+						if [ $INPUT == "1" ]
+						then
+						    chmod o+r $moddir
+						elif [ $INPUT == "2" ]
+						then
+						    chmod o+rw $moddir
+						elif [ $INPUT == "3" ]
+						then
+						    chmod o+w $moddir
+						elif [ $INPUT == "4" ]
+						then
+						    chmod o+wx $moddir
+						elif [ $INPUT == "5" ]
+						then
+						    chmod o+x $moddir
+						elif [ $INPUT == "6" ]
+						then
+						    chmod o+rx $moddir
+						elif [ $INPUT == "7" ]
+						then
+					        chmod o+rwx $moddir
+						else
+						    echo "Invalid input"
+						fi
+					elif [ $INPUT == "a" ]
 					then
-						echo -n "Permission for everyone >"
-						read per4
-						chmod a$per4 $DIRECTORY
+						echo "1. Everyone can only Read"
+						echo "2. Everyone can Read and Write"
+						echo "3. Everyone can only Write"
+						echo "4. Everyone can Write and Execute"
+						echo "5. Everyone can only Execute"
+						echo "6. Everyone can Read and Execute"
+						echo "7. Everyone can Read, Write and Execute"
+                        _choice_single
+						chmod a-wrx $moddir
 
-					elif [ $PER == 0 ]
+						if [ $INPUT == "1" ]
+						then
+						    chmod a+r $moddir
+						elif [ $INPUT == "2" ]
+						then
+						    chmod a+rw $moddir
+						elif [ $INPUT == "3" ]
+						then
+						    chmod a+w $moddir
+						elif [ $INPUT == "4" ]
+						then
+						    chmod a+wx $moddir
+						elif [ $INPUT == "5" ]
+						then
+						    chmod a+x $moddir
+						elif [ $INPUT == "6" ]
+						then
+						    chmod a+rx $moddir
+						elif [ $INPUT == "7" ]
+						then
+						    chmod a+rwx $moddir
+						else
+						    echo "Invalid input"
+						fi
+					elif [ $INPUT == "q" ]
 					then
 						RUN=0
-
 					else
 					echo "Invalid input"
 					fi
 				done
-			elif [ $NUM == "5" ]
+			elif [ $INPUT == "4" ]
 			then
 				echo "Press 1 for stickybit and 0 for regular"
                 _choice_single
@@ -540,7 +743,7 @@ _directory_modify(){
 					echo "Invalid input"
 				fi
 			else
-			echo "Invalid input"
+			    echo "Invalid input"
 			fi
 		fi
 	done
