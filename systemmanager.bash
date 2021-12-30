@@ -305,6 +305,7 @@ _directory() {
                 _directory_list
                 ;;
             v)
+	            echo "Choose directory to view properties of folder in."
                 _directory_view
                 _hold
                 ;;
@@ -341,7 +342,6 @@ _directory_menu() {
 }
 _directory_add(){
     #Enter directory name, if name contains spaces they will be replaced to underscores
-
     echo "Select where new directory should be added."
     _directory_list
 
@@ -370,29 +370,38 @@ _directory_add(){
 _directory_list(){
 	go=0
 	currentDir=`pwd`
+    QUITLIST=0
 
 	while [ $go == "0" ]
 	do
-	    echo "------------------------------------------------------"
-	    echo -e "\nCurrent Directory contains: "
+        echo -e "\n------------------------------------------------------"
+	    echo -e "\nCurrent Directory ${YELLOW}contains:${reset} "
 	    direc=`ls -l |  awk '{print $9}' | sed "s/ /\n/g"`
 	    echo "$direc"
 	    echo -e "\n------------------------------------------------------"
-	    echo -n "Current Directory: "
+	    echo -n "${GREEN}Current${reset} Directory: "
 	    pwd
 	    echo "------------------------------------------------------"
-	    echo -e "(b - Go back to previous directory, q - quit, s - select directory)"
+        echo "(${GREEN}s${reset} - Select directory, ${BLUE}p${reset} - Go to Parent directory)"
+        echo "(${YELLOW}b${reset} - Exit menu, ${RED}q${reset} - Exit program)"
 	    
         # Let the user enter directory
-        _choice_multiple
+        _choice_custom_multiple "directory"
 	    read SEARCH
 
-	    if [ $SEARCH == "b" ]
+	    if [ $SEARCH == "p" ]
 	    then	
 	        cd ..
 	    elif [ $SEARCH == "q" ]
 	    then
+            QUITLIST=1
+            _exit_program
+            RUNDIR=0
 	        go=1
+        elif [ $SEARCH == "b" ]
+        then
+            QUITLIST=1
+            go=1
         elif [ $SEARCH == "s" ]
         then
             go=1
@@ -410,8 +419,12 @@ _directory_list(){
 _directory_delete(){
     echo "Choose directory in which you want to delete a folder."
     _directory_list
-    _choice_custom_multiple "directory to delete"
-	read DELETE
+    if [[ QUITLIST -eq 1 ]]
+    then
+        return
+    fi
+
+	DELETE=`pwd`
 
 	rm -r $DELETE 2> err.log
 
@@ -426,8 +439,11 @@ _directory_delete(){
     cd $currentDir
 }
 _directory_view(){
-	echo "Choose directory to view properties of folder in."
     _directory_list
+    if [[ QUITLIST -eq 1 ]]
+    then
+        return
+    fi
 
     # Permissions of the directory
     CURDIR=`pwd`
@@ -448,20 +464,17 @@ _directory_view(){
     other=`getfacl -p $CURDIR | egrep "^o" | sed "s/:/ /g" | awk '{print $2}'`
     
     # User permissions
-    echo -en "\t${RED}User ${reset}"
+    echo -en "  ${RED}User ${reset}"
     _directory_view_permissions $userP
 
     # Group permissions
-    echo -en "\t${BLUE}Group ${reset}"
+    echo -en "  ${BLUE}Group ${reset}"
     _directory_view_permissions $grpP
 
     # Others permissions
-    echo -en "\t${YELLOW}Others ${reset}"
+    echo -en "  ${YELLOW}Others ${reset}"
     _directory_view_permissions $other
 
-    # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    #! MÅSTE ÄVEN KUNNA ÄNDRA SETUID OCH SETGID
-    # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     echo -n "${GREEN}s${reset} - Sticky bit: "
     sticky=`echo $DIRECTORY | awk '{print $1}' | tail -c 2`
     if [[ $sticky == "t" ]]
@@ -502,6 +515,10 @@ _directory_view_permissions() {
 _directory_modify(){
     _choice_custom_multiple "directory to modify"
 	_directory_view 
+    if [[ QUITLIST -eq 1 ]]
+    then
+        return
+    fi
 
     echo -e "\nWhich property do you want to modify?"
     _choice_single
@@ -535,192 +552,16 @@ _directory_modify(){
 
                 if [ $INPUT == "u" ]
                 then
-                    echo "1. User can only Read"
-                    echo "2. User can Read and Write"
-                    echo "3. User can only Write"
-                    echo "4. User can Write and Execute"
-                    echo "5. User can only Execute"
-                    echo "6. User can Read and Execute"
-                    echo "7. User can Read, Write and Execute"
-                    _choice_single
-                    chmod u-wrx $moddir
-
-                    if [ $INPUT == "1" ]
-                    then
-                        chmod u+r $moddir
-                    elif [ $INPUT == "2" ]
-                    then
-                        chmod u+rw $moddir
-                    elif [ $INPUT == "3" ]
-                    then
-                        chmod u+w $moddir
-                    elif [ $INPUT == "4" ]
-                    then
-                        chmod u+wx $moddir
-                    elif [ $INPUT == "5" ]
-                    then
-                        chmod u+x $moddir
-                    elif [ $INPUT == "6" ]
-                    then
-                        chmod u+rx $moddir
-                    elif [ $INPUT == "7" ]
-                    then
-                        chmod u+rwx $moddir
-                    elif [ $INPUT == "b" ]
-                    then
-                        # Move along
-                        RUN=0
-                    elif [ $INPUT == "q" ]
-                    then
-                        _exit_program
-                        RUNDIR=0
-                        RUNDIRMOD=0
-                        RUN=0
-                    else
-                        echo "Invalid input"
-                        _hold
-                    fi
+                    _directory_modify_permissions "u" 
                 elif [ $INPUT == "g" ]
                 then
-                    echo "1. Group can only Read"
-                    echo "2. Group can Read and Write"
-                    echo "3. Group can only Write"
-                    echo "4. Group can Write and Execute"
-                    echo "5. Group can only Execute"
-                    echo "6. Group can Read and Execute"
-                    echo "7. Group can Read, Write and Execute"
-                    _choice_single
-                    chmod g-wrx $moddir
-
-                    if [ $INPUT == "1" ]
-                    then
-                        chmod g+r $moddir
-                    elif [ $INPUT == "2" ]
-                    then
-                        chmod g+rw $moddir
-                    elif [ $INPUT == "3" ]
-                    then
-                        chmod g+w $moddir
-                    elif [ $INPUT == "4" ]
-                    then
-                        chmod g+wx $moddir
-                    elif [ $INPUT == "5" ]
-                    then
-                        chmod g+x $moddir
-                    elif [ $INPUT == "6" ]
-                    then
-                        chmod g+rx $moddir
-                    elif [ $INPUT == "7" ]
-                    then
-                        chmod g+rwx $moddir
-                    elif [ $INPUT == "b" ]
-                    then
-                        # Move along
-                        RUN=0
-                    elif [ $INPUT == "q" ]
-                    then
-                        _exit_program
-                        RUNDIR=0
-                        RUNDIRMOD=0
-                        RUN=0
-                    else
-                        echo "Invalid input"
-                        _hold
-                    fi
+                    _directory_modify_permissions "g"
                 elif [ $INPUT == "o" ]
                 then
-                    echo "1. Others can only Read"
-                    echo "2. Others can Read and Write"
-                    echo "3. Others can only Write"
-                    echo "4. Others can Write and Execute"
-                    echo "5. Others can only Execute"
-                    echo "6. Others can Read and Execute"
-                    echo "7. Others can Read, Write and Execute"
-                    _choice_single
-                    chmod o-wrx $moddir
-
-                    if [ $INPUT == "1" ]
-                    then
-                        chmod o+r $moddir
-                    elif [ $INPUT == "2" ]
-                    then
-                        chmod o+rw $moddir
-                    elif [ $INPUT == "3" ]
-                    then
-                        chmod o+w $moddir
-                    elif [ $INPUT == "4" ]
-                    then
-                        chmod o+wx $moddir
-                    elif [ $INPUT == "5" ]
-                    then
-                        chmod o+x $moddir
-                    elif [ $INPUT == "6" ]
-                    then
-                        chmod o+rx $moddir
-                    elif [ $INPUT == "7" ]
-                    then
-                        chmod o+rwx $moddir
-                    elif [ $INPUT == "b" ]
-                    then
-                        # Move along
-                        RUN=0
-                    elif [ $INPUT == "q" ]
-                    then
-                        _exit_program
-                        RUNDIR=0
-                        RUNDIRMOD=0
-                        RUN=0
-                    else
-                        echo "Invalid input"
-                        _hold
-                    fi
+                   _directory_modify_permissions "o"
                 elif [ $INPUT == "a" ]
                 then
-                    echo "1. Everyone can only Read"
-                    echo "2. Everyone can Read and Write"
-                    echo "3. Everyone can only Write"
-                    echo "4. Everyone can Write and Execute"
-                    echo "5. Everyone can only Execute"
-                    echo "6. Everyone can Read and Execute"
-                    echo "7. Everyone can Read, Write and Execute"
-                    _choice_single
-                    chmod a-wrx $moddir
-
-                    if [ $INPUT == "1" ]
-                    then
-                        chmod a+r $moddir
-                    elif [ $INPUT == "2" ]
-                    then
-                        chmod a+rw $moddir
-                    elif [ $INPUT == "3" ]
-                    then
-                        chmod a+w $moddir
-                    elif [ $INPUT == "4" ]
-                    then
-                        chmod a+wx $moddir
-                    elif [ $INPUT == "5" ]
-                    then
-                        chmod a+x $moddir
-                    elif [ $INPUT == "6" ]
-                    then
-                        chmod a+rx $moddir
-                    elif [ $INPUT == "7" ]
-                    then
-                        chmod a+rwx $moddir
-                    elif [ $INPUT == "b" ]
-                    then
-                        # Move along
-                        RUN=0
-                    elif [ $INPUT == "q" ]
-                    then
-                        _exit_program
-                        RUNDIR=0
-                        RUNDIRMOD=0
-                        RUN=0
-                    else
-                        echo "Invalid input"
-                        _hold
-                    fi
+                    _directory_modify_permissions "a"
                 elif [ $INPUT == "b" ]
                 then
                     RUN=0
@@ -765,30 +606,30 @@ _directory_modify(){
     done
 }
 _directory_modify_permissions() {
-
-    if [ $1 == "a" ]
-    then
-        # Grab permissions of user, group and others
-        PERMISSIONS=`getfacl -p $CURDIR | head -6 | tail -3 | awk -F "::" '{print $2}'`
-
-        # Loop through user, group and other permissions to check if permissions are on for all of them
-        _directory_check_all_permissions
-
-        # The permissions must be on for all to be showed as "ON" in the menu
-        # This checks the counts of reads, writes and executes.
-        # They must be 3 to count as a permission turned "ON" for all
-        _directory_check_all_counts
-    else
-        # Grab permission of individual user, group or other
-        PERMISSIONS=`getfacl -p $CURDIR | egrep "^$1" | sed "s/:/ /g" | awk '{print $2}'`
-        FIRSTPERM=${PERMISSIONS::1}
-        SECONDPERM=${PERMISSIONS::2}
-        THIRDPERM=${PERMISSIONS::3}
-    fi
-
     RUNPER=1
     while [[ $RUNPER -eq 1 ]]
-    then
+    do
+        if [ $1 == "a" ]
+        then
+            # Grab permissions of user, group and others
+            PERMISSIONS=`getfacl -p $CURDIR | head -6 | tail -3 | awk -F "::" '{print $2}'`
+
+            # Loop through user, group and other permissions to check if permissions are on for all of them
+            _directory_check_all_permissions
+
+            # The permissions must be on for all to be showed as "ON" in the menu
+            # This checks the counts of reads, writes and executes.
+            # They must be 3 to count as a permission turned "ON" for all
+            _directory_check_all_counts
+        else
+            # Grab permission of individual user, group or other
+            PERMISSIONS=`getfacl -p $CURDIR | egrep "^$1" | sed "s/:/ /g" | awk '{print $2}'`
+            FIRSTPERM=${PERMISSIONS::1}
+            SECONDPERM=${PERMISSIONS:1:1}
+            THIRDPERM=${PERMISSIONS:2:2}
+        fi
+        sticky=`ls -la $CURDIR | head -2 | tail -1 | awk '{print $1}' | tail -c 2`
+
         echo -en "\tModify "
         if [ $1 == "u" ]
         then
@@ -801,27 +642,27 @@ _directory_modify_permissions() {
             echo -n "${YELLOW}Other ${reset}"
         elif [ $1 == "a" ]
         then
-            echo -n "${YELLOW}All ${reset}"
+            echo -n "${GREEN}All ${reset}"
         else
             return 2
         fi
         echo -e "Permissions\n"
 
-        echo -n "Read: "
+        echo -n "${GREEN}r${reset} - Read: "
         if [ $FIRSTPERM == "r" ]
         then
             _directory_permissions_on
         else
             _directory_permissions_off
         fi
-        echo -n "Write: "
+        echo -n "${GREEN}w${reset} - Write: "
         if [ $SECONDPERM == "w" ]
         then
             _directory_permissions_on
         else
             _directory_permissions_off
         fi
-        echo -n "Execute: "
+        echo -n "${GREEN}x${reset} - Execute: "
         if [ $THIRDPERM == "x" ] || [ $THIRDPERM == "s" ] || [ $THIRDPERM == "t" ]
         then
             _directory_permissions_on
@@ -829,14 +670,16 @@ _directory_modify_permissions() {
             _directory_permissions_off
         fi
 
-        # Special permissions for uer, group or others
+        # Special permissions for user, group or others
         if [ $1 == "u" ] || [ $1 == "g" ]
         then
+            echo -n "${GREEN}s${reset} - "
             if [ $1 == "u" ]
             then
                 echo -n "SUID: "
             else
                 echo -n "SGID: "
+            fi
             if [ $THIRDPERM == "s" ] || [ $THIRDPERM == "S" ]
             then
                 _directory_permissions_on
@@ -845,8 +688,8 @@ _directory_modify_permissions() {
             fi
         elif [ $1 == "o" ]
         then
-            echo -n "Sticky bit: "
-            if [ $THIRDPERM == "t" ] || [ $THIRDPERM == "T" ]
+            echo -n "${GREEN}s${reset} - Sticky bit: "
+            if [ $sticky == "t" ] || [ $sticky == "T" ]
             then
                 _directory_permissions_on
             else
@@ -854,6 +697,69 @@ _directory_modify_permissions() {
             fi
         fi
 
+        _choice_single
+
+        case $INPUT in
+            r)
+                if [ $FIRSTPERM == "r" ]
+                then
+                    chmod $1-r $CURDIR
+                else
+                    chmod $1+r $CURDIR
+                fi
+                ;;
+            w)
+                if [ $SECONDPERM == "w" ]
+                then
+                    chmod $1-w $CURDIR
+                else
+                    chmod $1+w $CURDIR
+                fi
+                ;;
+            x)
+                if [ $THIRDPERM == "x" ] || [ $THIRDPERM == "s" ] || [ $THIRDPERM == "t" ]
+                then
+                    chmod $1-x $CURDIR
+                else
+                    chmod $1+x $CURDIR
+                fi
+                ;;
+            s)
+                if [ $1 == "u" ] || [ $1 == "g" ]
+                then
+                    if [ $THIRDPERM == "s" ] || [ $THIRDPERM == "S" ]
+                    then
+                        chmod $1-s $CURDIR
+                    else
+                        chmod $1+s $CURDIR
+                    fi
+                elif [ $1 == "o" ]
+                then
+                    if [ $sticky == "t" ] || [ $sticky == "T" ]
+                    then
+                        chmod -t $CURDIR
+                    else
+                        chmod +t $CURDIR
+                    fi
+                else
+                    echo 'Invalid input. Try again.'
+                    _hold
+                fi
+                ;;
+            b)
+                RUNPER=0
+                ;;
+            q)
+                _exit_program
+                RUNDIRMOD=0
+                RUN=0
+                RUNPER=0
+                ;;
+            *)
+                echo 'Invalid input. Try again.'
+                _hold
+                ;;
+        esac
     done
 }
 _directory_permissions_on() {
