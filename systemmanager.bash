@@ -251,6 +251,7 @@ _user_attributes_change() {
             else
                 echo -e "\nFailed to update password."
             fi
+            ;;
         b)
             return 1
             ;;
