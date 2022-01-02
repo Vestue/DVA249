@@ -212,6 +212,7 @@ _user_attributes_change() {
         RETVAL=$?
         if [[ $RETVAL -eq 0 ]]
         then
+            echo
             # echo "Password updated successfully!"
         elif [[ $RETVAL -eq 10 ]]
         then
