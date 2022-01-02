@@ -948,7 +948,7 @@ _group_list_users_in_specific_group() {
     then
         # The primary user of the primary group needs to be added
         # to the print of the members of the group.
-        USERS="${NAME}, ${USERS}"
+        USERS="${NAME},${USERS}"
     fi
     echo "Group members: $USERS"
 }
@@ -1008,7 +1008,7 @@ _group_add_user() {
     then
         # The primary user of the primary group needs to be added
         # to the print of the members of the group.
-        USERS="${GROUPNAME}, ${USERS}"
+        USERS="${GROUPNAME},${USERS}"
     fi
     echo -e "\nGroup members: $GROUPNAME"
 
@@ -1055,7 +1055,7 @@ _group_remove_user() {
     then
         # The primary user of the primary group needs to be added
         # to the print of the members of the group.
-        USERS="${GROUPNAME}, ${USERS}"
+        USERS="${GROUPNAME},${USERS}"
     fi
     echo -e "\nGroup members: $GROUPNAME"
 
