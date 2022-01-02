@@ -1078,7 +1078,7 @@ _group_remove() {
             if [[ $INPUT == "y" ]]
             then
                 groupdel -f $NAME
-                echo "Primary group $NAME has been deleted."
+                echo "Primary group $NAME has been ${RED}deleted${reset}."
             elif [[ $INPUT == "q" ]]
             then
                 _exit_program
