@@ -212,12 +212,12 @@ _user_attributes_change() {
         RETVAL=$?
         if [[ $RETVAL -eq 0 ]]
         then
-            echo "Password updated successfully!"
+            # echo "Password updated successfully!"
         elif [[ $RETVAL -eq 10 ]]
         then
-            echo "Password do not match. Try again."
+            echo "\nPassword do not match. Try again."
         else
-            echo "Failed to update password."
+            echo "\nFailed to update password."
         fi
         return 0
     fi
