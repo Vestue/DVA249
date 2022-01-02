@@ -629,6 +629,14 @@ _directory_modify_permissions() {
             THIRDPERM=${PERMISSIONS:2:2}
         fi
         sticky=`ls -la $CURDIR | head -2 | tail -1 | awk '{print $1}' | tail -c 2`
+        SUGIDCHECK="-"
+        if [ $1 == "u" ]
+        then
+            SUGIDCHECK=`ls -la $CURDIR | head -2 | tail -1 | awk '{print $1}' | head -c4 | tail -c1`
+        elif [ $1 == "g" ]
+        then
+            SUGIDCHECK=`ls -la $CURDIR | head -2 | tail -1 | awk '{print $1}' | head -c7 | tail -c1`
+        fi
 
         echo -en "\tModify "
         if [ $1 == "u" ]
@@ -680,7 +688,7 @@ _directory_modify_permissions() {
             else
                 echo -n "SGID: "
             fi
-            if [ $THIRDPERM == "s" ] || [ $THIRDPERM == "S" ]
+            if [ $SUGIDCHECK == "s" ] || [ $SUGIDCHECK == "S" ]
             then
                 _directory_permissions_on
             else
@@ -778,8 +786,8 @@ _directory_check_all_permissions() {
         i=$((i+1))
         SET=`echo $PERMISSIONS | cut -d ' ' -f $i`
         FIRSTPERM=${SET::1}
-        SECONDPERM=${SET::2}
-        THIRDPERM=${SET::3}
+        SECONDPERM=${SET:1:1}
+        THIRDPERM=${SET:2:2}
 
         if [ $FIRSTPERM == "r" ]
         then
