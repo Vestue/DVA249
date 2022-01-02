@@ -923,6 +923,7 @@ _group_list() {
 
     # Print groups within the range.
     eval getent group | awk -v min="$MIN" -v max="$MAX" -F ":" '$3 >= min && $3 <= max {print $1}'
+    echo
 }
 _group_list_users_in_specific_group() {
     _group_ask_which
