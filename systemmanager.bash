@@ -864,6 +864,7 @@ _group() {
                 _hold
                 ;;
             v)
+                _group_list
                 _group_list_users_in_specific_group
                 _hold
                 ;;
@@ -871,6 +872,7 @@ _group() {
                 _group_modify
                 ;;
             d)
+                _group_list
                 _group_remove
                 _hold
                 ;;            
@@ -978,6 +980,7 @@ _group_modify() {
     done
 }
 _group_add_user() {
+    _group_list
     echo 'Which group do you want to add a user to?'
     _group_ask_which
     read GROUPNAME
@@ -1009,6 +1012,7 @@ _group_add_user() {
     echo "$USERNAME has been added to $GROUPNAME!"
 }
 _group_remove_user() {
+    _group_list
     echo 'Which group do you want to remove a user from?'
     _group_ask_which
     read GROUPNAME
