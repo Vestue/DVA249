@@ -205,55 +205,52 @@ _user_attributes_change() {
     echo -e "\nWhich property do you want to modify?"
     _choice_single
 
-    # Changing password triggers a special dialogue.
-    if [[ $INPUT == "p" ]]
-    then
-        passwd -q $USERNAME 
-        RETVAL=$?
-        if [[ $RETVAL -eq 0 ]]
-        then
-            echo
-            # echo "Password updated successfully!"
-        elif [[ $RETVAL -eq 10 ]]
-        then
-            echo -e "\nPassword do not match. Try again."
-        else
-            echo -e "\nFailed to update password."
-        fi
-        return 0
-    fi
-
-    echo -e "\nWhat do you want to change it to?"
-    _choice_multiple
-    read NEWDATA
-
     case $INPUT in
         u)
+            _user_ask_changeto
             usermod -l $NEWDATA $USERNAME
             # Renames the homedirectory so that the user keeps the old files.
             mv /home/$USERNAME /home/$NEWDATA
             _user_attribute_success
             ;;
         i)
+            _user_ask_changeto
             usermod -u $NEWDATA $USERNAME
             _user_attribute_success
             ;;
         g)
+            _user_ask_changeto
             groupmod -g $NEWDATA $USERNAME
             _user_attribute_success
             ;;
         c)
+            _user_ask_changeto
             usermod -c $NEWDATA $USERNAME
             _user_attribute_success
             ;;
         d)
+            _user_ask_changeto
             usermod -md $NEWDATA $USERNAME
             _user_attribute_success
             ;;
         s)
+            _user_ask_changeto
             usermod -s $NEWDATA $USERNAME
             _user_attribute_success
             ;;
+        p)
+            passwd -q $USERNAME 
+            RETVAL=$?
+            if [[ $RETVAL -eq 0 ]]
+            then
+                echo
+                # echo "Password updated successfully!"
+            elif [[ $RETVAL -eq 10 ]]
+            then
+                echo -e "\nPassword do not match. Try again."
+            else
+                echo -e "\nFailed to update password."
+            fi
         b)
             return 1
             ;;
@@ -266,6 +263,11 @@ _user_attributes_change() {
             _hold
             ;;
     esac
+}
+_user_ask_changeto() {
+    echo -e "\nWhat do you want to change it to?"
+    _choice_multiple
+    read NEWDATA
 }
 _user_attribute_success() {
     echo "Field has been successfully ${YELLOW}changed${reset}!"
@@ -508,19 +510,20 @@ _directory_view_permissions() {
     fi
 }
 _directory_modify(){
-    _choice_custom_multiple "directory to modify"
-	_directory_view 
-    if [[ QUITLIST -eq 1 ]]
-    then
-        return
-    fi
-
-    echo -e "\nWhich property do you want to modify?"
-    _choice_single
     RUNDIRMOD=1
 
     while [[ $RUNDIRMOD -eq 1 ]]
     do
+        _choice_custom_multiple "directory to modify"
+        _directory_view 
+        if [[ QUITLIST -eq 1 ]]
+        then
+            return
+        fi
+
+        echo -e "\nWhich property do you want to modify?"
+        _choice_single
+
         if [ $INPUT == "o" ]
         then
             _user_list
