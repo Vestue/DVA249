@@ -998,6 +998,20 @@ _group_add_user() {
         return
     fi
 
+    # List group members
+    USERS=`getent group $GROUPNAME | awk -F ":" '{print $4}'`
+
+    # Test if the group is a primary group.
+    getent passwd $GROUPNAME &> /dev/null
+    RETVAL=$?
+    if [[ $RETVAL -eq 0 ]]
+    then
+        # The primary user of the primary group needs to be added
+        # to the print of the members of the group.
+        USERS="${GROUPNAME}, ${USERS}"
+    fi
+    echo "Group members: $GROUPNAME"
+
     _user_list
     echo -e "\nWhich user do you want to add to the group?"
     _user_ask_which
@@ -1031,7 +1045,20 @@ _group_remove_user() {
         return
     fi
 
-    _user_list
+     # List group members
+    USERS=`getent group $GROUPNAME | awk -F ":" '{print $4}'`
+
+    # Test if the group is a primary group.
+    getent passwd $GROUPNAME &> /dev/null
+    RETVAL=$?
+    if [[ $RETVAL -eq 0 ]]
+    then
+        # The primary user of the primary group needs to be added
+        # to the print of the members of the group.
+        USERS="${GROUPNAME}, ${USERS}"
+    fi
+    echo "Group members: $GROUPNAME"
+
     echo -e "\nWhich user do you want to remove from the group?"
     _user_ask_which
     read USERNAME
