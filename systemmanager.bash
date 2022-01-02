@@ -1047,6 +1047,7 @@ _group_remove_user() {
 
      # List group members
     USERS=`getent group $GROUPNAME | awk -F ":" '{print $4}'`
+    echo $USERS
 
     # Test if the group is a primary group.
     eval getent passwd $GROUPNAME &> /dev/null
