@@ -83,6 +83,7 @@ _user() {
         _choice_single
         case $INPUT in
             a)
+                _user_list
                 _user_create
                 _hold
                 ;;
@@ -91,15 +92,18 @@ _user() {
                 _hold
                 ;;
             v)
-                echo 'Which user do you want to see the properties of?'
+                _user_list
+                echo -e '\nWhich user do you want to see the properties of?'
                 _user_attributes_list
                 _hold
                 ;;
             m)
+                _user_list
                 _user_attributes_change
                 _hold
                 ;;
             d)
+                _user_list
                 _user_remove
                 _hold
                 ;;
@@ -149,7 +153,7 @@ _user_create() {
     fi
 }
 _user_list() {
-    echo -e "${RED}Users: ${reset}\n"
+    echo -e "\n\t${RED}Users: ${reset}\n"
 
     # Find the UID range for login-users in the system.
     MIN=`cat /etc/login.defs | grep UID_MIN | awk '{print $2}' | head -1`
@@ -194,7 +198,7 @@ _user_attributes_list() {
     fi
 }
 _user_attributes_change() {
-    echo "Which user do you want to modify the properties of?"
+    echo -e "\nWhich user do you want to modify the properties of?"
 
     # Asks the user to input a username and then prints a list with the chosen users attributes.
     _user_attributes_list
