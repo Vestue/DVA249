@@ -208,7 +208,7 @@ _user_attributes_change() {
     # Changing password triggers a special dialogue.
     if [[ $INPUT == "p" ]]
     then
-        passwd $USERNAME 2> /dev/null
+        passwd $USERNAME 
         RETVAL=$?
         if [[ $RETVAL -eq 0 ]]
         then
