@@ -963,9 +963,11 @@ _group_modify() {
         case $INPUT in
             a)
                 _group_add_user
+                RUNGRPMOD=0
                 ;;
             r)
                 _group_remove_user
+                RUNGRPMOD=0
                 ;;
             b)
                 RUNGRPMOD=0
@@ -996,6 +998,7 @@ _group_add_user() {
         return
     fi
 
+    _user_list
     echo -e "\nWhich user do you want to add to the group?"
     _user_ask_which
     read USERNAME
@@ -1011,7 +1014,7 @@ _group_add_user() {
 
     # Everything is good, add user to group.
     adduser $USERNAME $GROUPNAME &> /dev/null
-    echo "$USERNAME has been ${GREEN}added${reset} to $GROUPNAME!"
+    echo -e "\n$USERNAME has been ${GREEN}added${reset} to $GROUPNAME!"
 }
 _group_remove_user() {
     _group_list
@@ -1028,6 +1031,7 @@ _group_remove_user() {
         return
     fi
 
+    _user_list
     echo -e "\nWhich user do you want to remove from the group?"
     _user_ask_which
     read USERNAME
@@ -1043,7 +1047,7 @@ _group_remove_user() {
 
     # Everything is good, remove user from group.
     deluser $USERNAME $GROUPNAME &> /dev/null
-    echo "$USERNAME has been ${RED}removed${reset} from $GROUPNAME!"
+    echo -e "\n$USERNAME has been ${RED}removed${reset} from $GROUPNAME!"
 }
 _group_remove() {
     _group_ask_which
