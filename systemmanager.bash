@@ -481,7 +481,7 @@ _directory_view(){
 
     echo -n "${GREEN}s${reset} - Sticky bit: "
     sticky=`echo $DIRECTORY | awk '{print $1}' | tail -c 2`
-    if [[ $sticky == "t" ]]
+    if [[ $sticky == "t" ]] || [ $sticky == "T" ]
     then
         echo "Yes"
     else
@@ -535,13 +535,15 @@ _directory_modify(){
             _user_list
             _choice_custom_multiple "new directory owner"
             read OWN
-            chown $OWN $DIRECTORY
+            chown $OWN $CURDIR
+            RUNDIRMOD=0
         elif [ $INPUT == "g" ]
         then
             _group_list
             _choice_custom_multiple "new directory group"
             read GRP
-            chown :$GRP $DIRECTORY
+            chown :$GRP $CURDIR
+            RUNDIRMOD=0
         elif [ $INPUT == "p" ]
         then
             RUN=1
@@ -586,15 +588,15 @@ _directory_modify(){
             _choice_single
             if [ $INPUT == 1 ]
             then
-                chmod +t $DIRECTORY
+                chmod +t $CURDIR
             elif [ $INPUT == 0 ]
             then
-                chmod -t $DIRECTORY
+                chmod -t $CURDIR
             else
                 echo "Invalid input"
                 _hold
             fi
-            _hold
+            RUNDIRMOD=0
         elif [ $INPUT == "b" ]
         then
             RUNDIRMOD=0
