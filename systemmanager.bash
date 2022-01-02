@@ -1010,7 +1010,7 @@ _group_add_user() {
         # to the print of the members of the group.
         USERS="${GROUPNAME}, ${USERS}"
     fi
-    echo "Group members: $GROUPNAME"
+    echo -e "\nGroup members: $GROUPNAME"
 
     _user_list
     echo -e "\nWhich user do you want to add to the group?"
@@ -1057,7 +1057,7 @@ _group_remove_user() {
         # to the print of the members of the group.
         USERS="${GROUPNAME}, ${USERS}"
     fi
-    echo "Group members: $GROUPNAME"
+    echo -e "\nGroup members: $GROUPNAME"
 
     echo -e "\nWhich user do you want to remove from the group?"
     _user_ask_which
