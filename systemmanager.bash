@@ -1135,7 +1135,7 @@ _network_interfaces() {
         if [[ $RETVAL -eq 0 ]]
         then
             echo -n "${YELLOW}Gateway: ${reset}"
-            GATEWAY=`ip r | grep $NAME | tail -1 | awk '{print $3}'`
+            GATEWAY=`ip r | grep default | awk '{print $3}'`
             echo $GATEWAY
         fi
 
