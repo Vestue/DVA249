@@ -479,7 +479,7 @@ _directory_view(){
     echo -en "  ${YELLOW}Others ${reset}"
     _directory_view_permissions $other
     
-    echo -n "\n${GREEN}Last Modified: ${reset}"
+    echo -en "\n${GREEN}Last Modified: ${reset}"
     echo $DIRECTORY | awk '{print $6,$7,$8}' | head -1
 }
 _directory_view_permissions() {
