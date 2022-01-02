@@ -1087,7 +1087,7 @@ _group_remove() {
     fi
 }
 _group_ask_which() {
-    _choice_multiple "name of group"
+    _choice_custom_multiple "name of group"
 }
 
 ######################
