@@ -895,7 +895,7 @@ _group_menu() {
     echo "${BLUE}l${reset} - Group List    (List all groups (Non system))"
     echo "${BLUE}v${reset} - Group View    (Lists all users in a group)"
     echo "${BLUE}m${reset} - Group Modify  (Add/remove user from a group)"
-    echo "${BLUE}d${reset} - Group delete  (Delete a group)"
+    echo "${BLUE}d${reset} - Group Delete  (Delete a group)"
 }
 _group_create() {
     _group_ask_which
