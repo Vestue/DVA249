@@ -144,7 +144,7 @@ _user_create() {
     RETVAL=$?
     if [[ $RETVAL -eq 0 ]]
     then
-        echo -e "\n\nUser $USERNAME successfully created!"
+        echo -e "\n\nUser $USERNAME successfully ${GREEN}created${reset}!"
     elif [[ $RETVAL -eq 9 ]]
     then
         echo -e "\n\nUser $USERNAME already exists!"
@@ -268,7 +268,7 @@ _user_attributes_change() {
     esac
 }
 _user_attribute_success() {
-    echo 'Field has been successfully changed!'
+    echo "Field has been successfully ${YELLOW}changed${reset}!"
 }
 _user_remove() {
     _user_ask_which
@@ -278,7 +278,7 @@ _user_remove() {
     RETVAL=$?
     if [[ $RETVAL -eq 0 ]]
     then
-        echo -e "\nUser $USERNAME has been removed!"
+        echo -e "\nUser $USERNAME has been ${RED}removed${reset}!"
     elif [[ $RETVAL -eq 6 ]]
     then
         echo -e "\nUser $USERNAME does not exist."
@@ -360,7 +360,7 @@ _directory_add(){
 	RETVAL=$?
 	if [ $RETVAL ==  0 ]
 	then
-		echo "A directory named $NOSPACES has been added!"  
+		echo "A directory named $NOSPACES has been ${GREEN}added${reset}!"  
 	else
 		echo "Directory could not be created"
 	fi
@@ -436,7 +436,7 @@ _directory_delete(){
 
 	if [ $RETVAL == 0 ]
 	then
-		echo -e "\nThe directory $DELETE has been deleted."
+		echo -e "\nThe directory $DELETE has been ${RED}deleted${reset}."
 	else
 		echo -e "\nDirectory could not be removed."
 	fi
@@ -488,7 +488,7 @@ _directory_view(){
         echo "No"
     fi
     
-    echo -n "${GREEN}Last Opened: ${reset}"
+    echo -n "${GREEN}Last Modified: ${reset}"
     echo $DIRECTORY | awk '{print $6,$7,$8}' | head -1
 }
 _directory_view_permissions() {
@@ -907,7 +907,7 @@ _group_create() {
     RETVAL=$?
     if [[ $RETVAL -eq 0 ]]
     then
-        echo "Group $NAME has been created!"
+        echo "Group $NAME has been ${GREEN}created${reset}!"
     elif [[ $RETVAL -eq 1 ]]
     then
         echo "Group $NAME already exists."
@@ -1011,7 +1011,7 @@ _group_add_user() {
 
     # Everything is good, add user to group.
     adduser $USERNAME $GROUPNAME &> /dev/null
-    echo "$USERNAME has been added to $GROUPNAME!"
+    echo "$USERNAME has been ${GREEN}added${reset} to $GROUPNAME!"
 }
 _group_remove_user() {
     _group_list
@@ -1043,7 +1043,7 @@ _group_remove_user() {
 
     # Everything is good, remove user from group.
     deluser $USERNAME $GROUPNAME &> /dev/null
-    echo "$USERNAME has been removed from $GROUPNAME!"
+    echo "$USERNAME has been ${RED}removed${reset} from $GROUPNAME!"
 }
 _group_remove() {
     _group_ask_which
@@ -1086,7 +1086,7 @@ _group_remove() {
                 echo 'Exiting.. '
             fi
         else
-            echo "Group $NAME has been deleted."
+            echo "Group $NAME has been ${RED}deleted${reset}."
         fi
     else
         echo "$NAME is a systemgroup. It cannot be deleted through this program."
