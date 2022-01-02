@@ -192,7 +192,7 @@ _user_attributes_list() {
 
         #GROUPS=`groups $USERNAME | cut -d " " -f 3- | sed "s/ /,/g"`
         echo -en "\n${RED}Groups:${reset}"
-        eval groups $USERNAME | cut -d " " -f 3- | sed "s/ /,/g"
+        eval groups $USERNAME | cut -d " " -f 3- | sed "s/ /, /g"
     else
         echo "Can't find user!"
     fi
