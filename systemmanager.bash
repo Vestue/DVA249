@@ -1002,7 +1002,7 @@ _group_add_user() {
     USERS=`getent group $GROUPNAME | awk -F ":" '{print $4}'`
 
     # Test if the group is a primary group.
-    getent passwd $GROUPNAME &> /dev/null
+    eval getent passwd $GROUPNAME &> /dev/null
     RETVAL=$?
     if [[ $RETVAL -eq 0 ]]
     then
@@ -1049,7 +1049,7 @@ _group_remove_user() {
     USERS=`getent group $GROUPNAME | awk -F ":" '{print $4}'`
 
     # Test if the group is a primary group.
-    getent passwd $GROUPNAME &> /dev/null
+    eval getent passwd $GROUPNAME &> /dev/null
     RETVAL=$?
     if [[ $RETVAL -eq 0 ]]
     then
