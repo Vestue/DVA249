@@ -144,12 +144,12 @@ _user_create() {
     RETVAL=$?
     if [[ $RETVAL -eq 0 ]]
     then
-        echo -e "\nUser $USERNAME successfully created!"
+        echo -e "\n\nUser $USERNAME successfully created!"
     elif [[ $RETVAL -eq 9 ]]
     then
-        echo -e "\nUser $USERNAME already exists!"
+        echo -e "\n\nUser $USERNAME already exists!"
     else
-        echo -e "\nFailed to add user."
+        echo -e "\n\nFailed to add user."
     fi
 }
 _user_list() {
@@ -193,7 +193,7 @@ _user_attributes_list() {
         echo -en "\n${RED}Groups: ${reset}"
         eval groups $USERNAME | cut -d " " -f 3- | sed "s/ /, /g"
     else
-        echo "Can't find user!"
+        echo -e "\nCan't find user!"
     fi
 }
 _user_attributes_change() {
@@ -278,12 +278,12 @@ _user_remove() {
     RETVAL=$?
     if [[ $RETVAL -eq 0 ]]
     then
-        echo "User $USERNAME has been removed!"
+        echo -e "\nUser $USERNAME has been removed!"
     elif [[ $RETVAL -eq 6 ]]
     then
-        echo "User $USERNAME does not exist."
+        echo -e "\nUser $USERNAME does not exist."
     else
-        echo "Failed to add user."
+        echo -e "\nFailed to add user."
     fi
 }
 _user_ask_which() {
