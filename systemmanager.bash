@@ -144,12 +144,12 @@ _user_create() {
     RETVAL=$?
     if [[ $RETVAL -eq 0 ]]
     then
-        echo "User $USERNAME successfully created!"
+        echo -e "\nUser $USERNAME successfully created!"
     elif [[ $RETVAL -eq 9 ]]
     then
-        echo "User $USERNAME already exists!"
+        echo -e "\nUser $USERNAME already exists!"
     else
-        echo "Failed to add user."
+        echo -e "\nFailed to add user."
     fi
 }
 _user_list() {
@@ -208,7 +208,7 @@ _user_attributes_change() {
     # Changing password triggers a special dialogue.
     if [[ $INPUT == "p" ]]
     then
-        passwd $USERNAME &> /dev/null
+        passwd $USERNAME 2> /dev/null
         RETVAL=$?
         if [[ $RETVAL -eq 0 ]]
         then
