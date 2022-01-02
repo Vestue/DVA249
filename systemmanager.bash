@@ -190,7 +190,6 @@ _user_attributes_list() {
         SHELLDIR=`echo $ATTR | awk -F ":" '{print $7}'`
         echo "${RED}s${reset} - Shell: $SHELLDIR"
 
-        #GROUPS=`groups $USERNAME | cut -d " " -f 3- | sed "s/ /,/g"`
         echo -en "\n${RED}Groups: ${reset}"
         eval groups $USERNAME | cut -d " " -f 3- | sed "s/ /, /g"
     else
