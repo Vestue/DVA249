@@ -136,7 +136,7 @@ _user_create() {
     _choice_custom_multiple "password of user"
     read -s PASSWORD
     
-    useradd $USERNAME -c $FULLNAME -md /home/$USERNAME -s /bin/bash -p $PASSWORD
+    useradd $USERNAME -c "$FULLNAME" -md /home/$USERNAME -s /bin/bash -p $PASSWORD
     RETVAL=$?
     if [[ $RETVAL -eq 0 ]]
     then
