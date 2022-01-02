@@ -609,10 +609,26 @@ _directory_modify_permissions() {
     RUNPER=1
     while [[ $RUNPER -eq 1 ]]
     do
+        sticky=`ls -la $CURDIR | head -2 | tail -1 | awk '{print $1}' | tail -c 2`
+
+        SUGIDCHECK="-"
+        if [ $1 == "u" ]
+        then
+            SUGIDCHECK=`ls -la $CURDIR | head -2 | tail -1 | awk '{print $1}' | head -c4 | tail -c1`
+        elif [ $1 == "g" ]
+        then
+            SUGIDCHECK=`ls -la $CURDIR | head -2 | tail -1 | awk '{print $1}' | head -c7 | tail -c1`
+        fi
+
         if [ $1 == "a" ]
         then
             # Grab permissions of user, group and others
-            PERMISSIONS=`getfacl -p $CURDIR | head -6 | tail -3 | awk -F "::" '{print $2}'`
+            if [ $sticky == "t" ] || [ $SUGIDCHECK == "s" ] || [ $sticky == "T" ] || [ $SUGIDCHECK == "S" ]
+            then
+                PERMISSIONS=`getfacl -p $CURDIR | head -7 | tail -3 | awk -F "::" '{print $2}'`
+            else
+                PERMISSIONS=`getfacl -p $CURDIR | head -6 | tail -3 | awk -F "::" '{print $2}'`
+            fi
 
             # Loop through user, group and other permissions to check if permissions are on for all of them
             _directory_check_all_permissions
@@ -628,16 +644,7 @@ _directory_modify_permissions() {
             SECONDPERM=${PERMISSIONS:1:1}
             THIRDPERM=${PERMISSIONS:2:2}
         fi
-        sticky=`ls -la $CURDIR | head -2 | tail -1 | awk '{print $1}' | tail -c 2`
-        SUGIDCHECK="-"
-        if [ $1 == "u" ]
-        then
-            SUGIDCHECK=`ls -la $CURDIR | head -2 | tail -1 | awk '{print $1}' | head -c4 | tail -c1`
-        elif [ $1 == "g" ]
-        then
-            SUGIDCHECK=`ls -la $CURDIR | head -2 | tail -1 | awk '{print $1}' | head -c7 | tail -c1`
-        fi
-
+    
         echo -en "\tModify "
         if [ $1 == "u" ]
         then
