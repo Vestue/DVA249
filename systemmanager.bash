@@ -957,8 +957,8 @@ _group_modify() {
     while [[ $RUNGRPMOD -eq 1 ]]
     do
         echo -e "Do you want to add or remove a user?\n"
-        echo "a - Add user"
-        echo "r - Remove user"
+        echo "${BLUE}a${reset} - Add user"
+        echo "${BLUE}r${reset} - Remove user"
         _choice_single
         case $INPUT in
             a)
