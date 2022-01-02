@@ -430,18 +430,34 @@ _directory_delete(){
         return
     fi
 
+	del=1
 	DELETE=`pwd`
+	for i in $home
+    do
+        if [ "/home/$i" == $DELETE ]
+	    then
+	        echo "$DELETE is a home directory, are you sure you want to delete it?"
+            echo -e "${GREEN}1.${reset} Yes\n${RED}2.${reset} No"
+            echo -n "Choice >"
+            read del
+	    fi
+	done
 
-	rm -r $DELETE 2> err.log
-
-	RETVAL=$?
-
-	if [ $RETVAL == 0 ]
+	if [ $del == "1" ]
 	then
-		echo -e "\nThe directory $DELETE has been ${RED}deleted${reset}."
-	else
-		echo -e "\nDirectory could not be removed."
+	    rm -r $DELETE 2> err.log
+	    RETVAL=$?
 	fi
+
+    if [ $RETVAL == 0 ] &&  [ $del == 1 ]
+	then
+		echo -e "\nThe directory $DELETE was successfully ${RED}deleted${reset}!"
+	elif [ $RETVAL != 0 ] || [ $del == 2 ]
+	then
+		echo -e "\nThe directory failed to get deleted."
+	else
+		echo -e "\nError." 
+    fi 
     cd $currentDir
 }
 _directory_view(){
