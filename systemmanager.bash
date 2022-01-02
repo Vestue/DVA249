@@ -478,17 +478,8 @@ _directory_view(){
     # Others permissions
     echo -en "  ${YELLOW}Others ${reset}"
     _directory_view_permissions $other
-
-    echo -n "${GREEN}s${reset} - Sticky bit: "
-    sticky=`echo $DIRECTORY | awk '{print $1}' | tail -c 2`
-    if [[ $sticky == "t" ]] || [ $sticky == "T" ]
-    then
-        echo "Yes"
-    else
-        echo "No"
-    fi
     
-    echo -n "${GREEN}Last Modified: ${reset}"
+    echo -n "\n${GREEN}Last Modified: ${reset}"
     echo $DIRECTORY | awk '{print $6,$7,$8}' | head -1
 }
 _directory_view_permissions() {
@@ -582,21 +573,6 @@ _directory_modify(){
                     _hold
                 fi
             done
-        elif [ $INPUT == "s" ]
-        then
-            echo "Press 1 for stickybit and 0 for regular"
-            _choice_single
-            if [ $INPUT == 1 ]
-            then
-                chmod +t $CURDIR
-            elif [ $INPUT == 0 ]
-            then
-                chmod -t $CURDIR
-            else
-                echo "Invalid input"
-                _hold
-            fi
-            RUNDIRMOD=0
         elif [ $INPUT == "b" ]
         then
             RUNDIRMOD=0
