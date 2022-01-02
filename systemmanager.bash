@@ -735,7 +735,7 @@ _directory_modify_permissions() {
             s)
                 if [ $1 == "u" ] || [ $1 == "g" ]
                 then
-                    if [ $THIRDPERM == "s" ] || [ $THIRDPERM == "S" ]
+                    if [ $SUGIDCHECK == "s" ] || [ $SUGIDCHECK == "S" ]
                     then
                         chmod $1-s $CURDIR
                     else
