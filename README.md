@@ -10,3 +10,4 @@ Linux Projektuppgift
 6. Using big letter while adding groups prints an error, convert all big letter to small letter before adding group.
 7. Big letters in username should also be converted to small letters and spaces to be converted to _.
 8. Deleting a user does not delete the usergroup and also seems to not delete user directory.
+9. All error prints should be redirected. All possible returnvalues should be properly handled separetely.
