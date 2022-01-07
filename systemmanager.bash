@@ -317,7 +317,6 @@ _directory() {
                 ;;
             m)
                 _directory_modify
-                _hold
                 ;;
             d)
                 _directory_delete
@@ -364,9 +363,9 @@ _directory_add(){
 	RETVAL=$?
 	if [ $RETVAL ==  0 ]
 	then
-		echo "A directory named $NOSPACES has been ${GREEN}added${reset}!"  
+		echo -e "\nA directory named $NOSPACES has been ${GREEN}added${reset}!"  
 	else
-		echo "Directory could not be created"
+		echo -e "\nDirectory could not be created"
 	fi
     cd $currentDir
 }
