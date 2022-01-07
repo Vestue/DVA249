@@ -309,21 +309,18 @@ _directory() {
         case $INPUT in
             a) 
                 _directory_add
-                _hold
                 ;;
             l)
                 _directory_list
                 ;;
             v)
-                _directory_view 
-                _hold
+                _directory_view
                 ;;
             m)
                 _directory_modify
                 ;;
             d)
                 _directory_delete
-                _hold
                 ;;
             b)
                 RUNDIR=0
@@ -371,6 +368,7 @@ _directory_add(){
 		echo -e "\nDirectory could not be created"
 	fi
     cd $currentDir
+    _hold
 }
 
 # direc shows all folders in current directory, 
@@ -466,6 +464,7 @@ _directory_delete(){
 		echo -e "\nError." 
     fi 
     cd $currentDir
+    _hold
 }
 _directory_view(){
     _directory_list "Choose directory to view properties of folder in."
@@ -506,6 +505,8 @@ _directory_view(){
     
     echo -en "\n${GREEN}Last Modified: ${reset}"
     echo $DIRECTORY | awk '{print $6,$7,$8}' | head -1
+
+    _hold
 }
 _directory_view_permissions() {
     if [ $1 == "r--" ]
