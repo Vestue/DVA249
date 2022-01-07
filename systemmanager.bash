@@ -355,6 +355,10 @@ _directory_add(){
     #Enter directory name, if name contains spaces they will be replaced to underscores
     echo "Select where new directory should be added."
     _directory_list
+    if [[ $QUITLIST -eq 1 ]]
+    then
+        return
+    fi
 
     _choice_custom_multiple "directory name"
 	read DIRECTORYNAME
@@ -430,7 +434,7 @@ _directory_list(){
 _directory_delete(){
     echo "Choose directory in which you want to delete a folder."
     _directory_list
-    if [[ QUITLIST -eq 1 ]]
+    if [[ $QUITLIST -eq 1 ]]
     then
         return
     fi
@@ -468,7 +472,7 @@ _directory_delete(){
 }
 _directory_view(){
     _directory_list
-    if [[ QUITLIST -eq 1 ]]
+    if [[ $QUITLIST -eq 1 ]]
     then
         return
     fi
@@ -538,7 +542,7 @@ _directory_modify(){
     do
         _choice_custom_multiple "directory to modify"
         _directory_view 
-        if [[ QUITLIST -eq 1 ]]
+        if [[ $QUITLIST -eq 1 ]]
         then
             return
         fi
