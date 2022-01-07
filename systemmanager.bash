@@ -923,12 +923,12 @@ _group_create() {
     RETVAL=$?
     if [[ $RETVAL -eq 0 ]]
     then
-        echo "Group $NAME has been ${GREEN}created${reset}!"
+        echo -e "\nGroup $NAME has been ${GREEN}created${reset}!"
     elif [[ $RETVAL -eq 1 ]]
     then
-        echo "Group $NAME already exists."
+        echo -e "\nGroup $NAME already exists."
     else
-        echo 'Failed to create group.'
+        echo -e '\nFailed to create group.'
     fi
 }
 _group_list() {
