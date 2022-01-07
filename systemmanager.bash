@@ -378,11 +378,12 @@ _directory_list(){
 	go=0
 	currentDir=`pwd`
     QUITLIST=0
+    MESSAGE=$1
 
 	while [ $go == "0" ]
 	do
         clear
-        echo $1
+        $MESSAGE
         echo -e "\n------------------------------------------------------"
 	    echo -e "\nCurrent Directory ${YELLOW}contains:${reset} "
 	    direc=`ls -l |  awk '{print $9}' | sed "s/ /\n/g"`
