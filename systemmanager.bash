@@ -135,6 +135,8 @@ _user_create() {
     read USERNAME
     # Convert uppercases to lowercases
     USERNAME=`echo $USERNAME | tr '[:upper:]' '[:lower:]' `
+    # Convert spacing to underscore
+    USERNAME=`echo $USERNAME | sed 's/ /_/g'`
 
     _choice_custom_multiple "full name of user"
     read FULLNAME
