@@ -6,8 +6,10 @@ Linux Projektuppgift
 2. Going back from the permissions toggle-menu causes the program to ask the user to enter another directory. It should just go back to the main directory function.
 3. Make permission text align properly in modify directory menu. Add two whitespaces before "Permission" in front of USER and one space before "Permission" in front of GROUP.
 4. Fix checking for "home=ls /home" in delete directory function.
-5. Add clear before every print
-6. Using big letter while adding groups prints an error, convert all big letter to small letter before adding group.
-7. Big letters in username should also be converted to small letters and spaces to be converted to _.
-8. Deleting a user does not delete the usergroup and also seems to not delete user directory.
-9. All error prints should be redirected. All possible returnvalues should be properly handled separetely.
+- Done
+6. Add clear before every print
+- Done
+8. Using big letter while adding groups prints an error, convert all big letter to small letter before adding group.
+9. Big letters in username should also be converted to small letters and spaces to be converted to _.
+10. Deleting a user does not delete the usergroup and also seems to not delete user directory.
+11. All error prints should be redirected. All possible returnvalues should be properly handled separetely.
