@@ -955,7 +955,7 @@ _group_list_users_in_specific_group() {
         # to the print of the members of the group.
         USERS="${NAME},${USERS}"
     fi
-    echo "Group members: $USERS"
+    echo -e "\nGroup members: $USERS"
 }
 _group_modify() {
     RUNGRPMOD=1
