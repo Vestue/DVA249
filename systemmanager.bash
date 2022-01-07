@@ -432,6 +432,7 @@ _directory_delete(){
 
 	del=1
 	DELETE=`pwd`
+    home=`ls /home`
 	for i in $home
     do
         if [ "/home/$i" == $DELETE ]
