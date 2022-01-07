@@ -305,22 +305,27 @@ _directory() {
         _choice_single
         case $INPUT in
             a) 
+                clear
                 _directory_add
                 _hold
                 ;;
             l)
+                clear
                 _directory_list
                 ;;
             v)
+                clear
 	            echo "Choose directory to view properties of folder in."
                 _directory_view
                 _hold
                 ;;
             m)
+                clear
                 _directory_modify
                 _hold
                 ;;
             d)
+                clear
                 _directory_delete
                 _hold
                 ;;
@@ -374,7 +379,6 @@ _directory_add(){
 # and see if one of them matches the users input. 
 # If it does it will show content if the folder the user searched for.
 _directory_list(){
-    clear
 	go=0
 	currentDir=`pwd`
     QUITLIST=0
