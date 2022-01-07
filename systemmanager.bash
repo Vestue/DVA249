@@ -138,6 +138,15 @@ _user_create() {
     # Convert spacing to underscore
     USERNAME=`echo $USERNAME | sed 's/ /_/g'`
 
+    # Check if user already exists
+    eval getent passwd $USERNAME &> /dev/null
+    RETVAL=$?
+    if [[ $RETVAL -eq 0 ]]
+    then
+        echo -e "\nUser already exists."
+        return
+    fi
+
     _choice_custom_multiple "full name of user"
     read FULLNAME
     
@@ -284,7 +293,6 @@ _user_remove() {
     RETVAL=$?
     if [[ $RETVAL -eq 0 ]]
     then
-        #groupdel -f $USERNAME $> /dev/null
         echo -e "\nUser $USERNAME has been ${RED}removed${reset}!"
     elif [[ $RETVAL -eq 6 ]]
     then
