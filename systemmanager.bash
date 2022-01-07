@@ -30,6 +30,7 @@ _main() {
     CONTINUE=1
     while [[ $CONTINUE -eq 1 ]]
     do
+        clear
         _main_menu
         _choice_single
         case $INPUT in
@@ -301,6 +302,7 @@ _directory() {
     RUNDIR=1
     while [[ $RUNDIR -eq 1 ]]
     do
+        clear
         _directory_menu
         _choice_single
         case $INPUT in
@@ -849,6 +851,7 @@ _group() {
     RUNGRP=1
     while [[ $RUNGRP -eq 1 ]]
     do
+        clear
         _group_menu
         _choice_single
         case $INPUT in
@@ -1128,6 +1131,7 @@ _group_ask_which() {
 ####################
 
 _network_menu() {
+    clear
     echo -e "\n******************************************************"
     echo "--------------------NETWORK MENU----------------------"
 
