@@ -901,6 +901,10 @@ _group_menu() {
 _group_create() {
     _group_ask_which
     read NAME
+
+    # Convert uppercases to lowercases
+    NAME=`echo $NAME | tr '[:upper:]' '[:lower:]' `
+
     eval addgroup $NAME 2> /dev/null
     RETVAL=$?
     if [[ $RETVAL -eq 0 ]]
