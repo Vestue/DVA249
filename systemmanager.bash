@@ -61,13 +61,13 @@ _main() {
 _main_menu() {
     echo -e "\n******************************************************"
     echo "--------------------SYSTEM MANAGER--------------------"
-    echo "${RED}u${reset} Users"
+    echo "${RED}u${reset} - Users"
     echo ""
-    echo "${GREEN}d${reset} Directories"
+    echo "${GREEN}d${reset} - Directories"
     echo
-    echo "${BLUE}g${reset} Groups"
+    echo "${BLUE}g${reset} - Groups"
     echo
-    echo "${YELLOW}n${reset} Network"
+    echo "${YELLOW}n${reset} - Network"
     echo
 }
 
