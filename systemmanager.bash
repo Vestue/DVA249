@@ -383,7 +383,7 @@ _directory_list(){
 	while [ $go == "0" ]
 	do
         clear
-        $MESSAGE
+        echo $MESSAGE
         echo -e "\n------------------------------------------------------"
 	    echo -e "\nCurrent Directory ${YELLOW}contains:${reset} "
 	    direc=`ls -l |  awk '{print $9}' | sed "s/ /\n/g"`
