@@ -1210,7 +1210,7 @@ _network_interfaces() {
 _hold() {
     # Wait for user input before continuing to next step.
     echo "------------------------------------------------------"
-    echo -en "Press any key to continue..\n\n"
+    echo -en "Press any key to continue.. "
     read -sn1 INPUT
 }
 _choice_single() {
