@@ -306,6 +306,7 @@ _directory() {
         case $INPUT in
             a) 
                 _directory_add
+                _hold
                 ;;
             l)
                 _directory_list
