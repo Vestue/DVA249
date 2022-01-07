@@ -305,27 +305,20 @@ _directory() {
         _choice_single
         case $INPUT in
             a) 
-                clear
                 _directory_add
-                _hold
                 ;;
             l)
-                clear
                 _directory_list
                 ;;
             v)
-                clear
-	            echo "Choose directory to view properties of folder in."
-                _directory_view
+                _directory_view 
                 _hold
                 ;;
             m)
-                clear
                 _directory_modify
                 _hold
                 ;;
             d)
-                clear
                 _directory_delete
                 _hold
                 ;;
@@ -353,8 +346,7 @@ _directory_menu() {
 }
 _directory_add(){
     #Enter directory name, if name contains spaces they will be replaced to underscores
-    echo "Select where new directory should be added."
-    _directory_list
+    _directory_list "Select where new directory should be added."
     if [[ $QUITLIST -eq 1 ]]
     then
         return
@@ -389,6 +381,8 @@ _directory_list(){
 
 	while [ $go == "0" ]
 	do
+        clear
+        echo $1
         echo -e "\n------------------------------------------------------"
 	    echo -e "\nCurrent Directory ${YELLOW}contains:${reset} "
 	    direc=`ls -l |  awk '{print $9}' | sed "s/ /\n/g"`
@@ -432,8 +426,7 @@ _directory_list(){
 	done
 }
 _directory_delete(){
-    echo "Choose directory in which you want to delete a folder."
-    _directory_list
+    _directory_list "Choose directory in which you want to delete a folder."
     if [[ $QUITLIST -eq 1 ]]
     then
         return
@@ -471,7 +464,7 @@ _directory_delete(){
     cd $currentDir
 }
 _directory_view(){
-    _directory_list
+    _directory_list "Choose directory to view properties of folder in."
     if [[ $QUITLIST -eq 1 ]]
     then
         return
@@ -537,7 +530,6 @@ _directory_view_permissions() {
 }
 _directory_modify(){
     RUNDIRMOD=1
-
     while [[ $RUNDIRMOD -eq 1 ]]
     do
         _choice_custom_multiple "directory to modify"
