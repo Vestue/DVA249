@@ -85,31 +85,26 @@ _user() {
         _choice_single
         case $INPUT in
             a)
-                clear
                 _user_list
                 _user_create
                 _hold
                 ;;
             l)
-                clear
                 _user_list
                 _hold
                 ;;
             v)
-                clear
                 _user_list
                 echo -e '\nWhich user do you want to see the properties of?'
                 _user_attributes_list
                 _hold
                 ;;
             m)
-                clear
                 _user_list
                 _user_attributes_change
                 _hold
                 ;;
             d)
-                clear
                 _user_list
                 _user_remove
                 _hold
@@ -313,27 +308,22 @@ _directory() {
         _choice_single
         case $INPUT in
             a) 
-                clear
                 _directory_add
                 _hold
                 ;;
             l)
-                clear
                 _directory_list
                 ;;
             v)
-                clear
 	            echo "Choose directory to view properties of folder in."
                 _directory_view
                 _hold
                 ;;
             m)
-                clear
                 _directory_modify
                 _hold
                 ;;
             d)
-                clear
                 _directory_delete
                 _hold
                 ;;
@@ -867,27 +857,22 @@ _group() {
         _choice_single
         case $INPUT in
             a)
-                clear
                 _group_create
                 _hold
                 ;;
             l) 
-                clear
                 _group_list
                 _hold
                 ;;
             v)
-                clear
                 _group_list
                 _group_list_users_in_specific_group
                 _hold
                 ;;
             m)
-                clear
                 _group_modify
                 ;;
             d)
-                clear
                 _group_list
                 _group_remove
                 _hold
