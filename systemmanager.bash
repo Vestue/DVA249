@@ -374,6 +374,7 @@ _directory_add(){
 # and see if one of them matches the users input. 
 # If it does it will show content if the folder the user searched for.
 _directory_list(){
+    clear
 	go=0
 	currentDir=`pwd`
     QUITLIST=0
