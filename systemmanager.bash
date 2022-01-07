@@ -282,7 +282,7 @@ _user_remove() {
     RETVAL=$?
     if [[ $RETVAL -eq 0 ]]
     then
-        groupdel -f $USERNAME $> /dev/null
+        #groupdel -f $USERNAME $> /dev/null
         echo -e "\nUser $USERNAME has been ${RED}removed${reset}!"
     elif [[ $RETVAL -eq 6 ]]
     then
