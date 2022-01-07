@@ -922,7 +922,7 @@ _group_create() {
     fi
 }
 _group_list() {
-    echo -e "${BLUE}Groups: ${reset}\n"
+    echo "${BLUE}Groups: ${reset}"
 
     # Find the GID range for user made groups in the system.
     MIN=`cat /etc/login.defs | grep GID_MIN | awk '{print $2}' | head -1`
