@@ -136,11 +136,13 @@ _user_create() {
     
     _choice_custom_multiple "username of user"
     read USERNAME
+    # Convert uppercases to lowercases
+    USERNAME=`echo $USERNAME | tr '[:upper:]' '[:lower:]' `
     
     _choice_custom_multiple "password of user"
     read -s PASSWORD
     
-    useradd $USERNAME -c "$FULLNAME" -md /home/$USERNAME -s /bin/bash -p $PASSWORD
+    useradd $USERNAME -c "$FULLNAME" -md /home/$USERNAME -s /bin/bash -p $PASSWORD &> /dev/null
     RETVAL=$?
     if [[ $RETVAL -eq 0 ]]
     then
@@ -905,7 +907,7 @@ _group_create() {
     # Convert uppercases to lowercases
     NAME=`echo $NAME | tr '[:upper:]' '[:lower:]' `
 
-    eval addgroup $NAME 2> /dev/null
+    eval addgroup $NAME &> /dev/null
     RETVAL=$?
     if [[ $RETVAL -eq 0 ]]
     then
