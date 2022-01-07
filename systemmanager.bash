@@ -623,8 +623,11 @@ _directory_modify_permissions() {
 
         if [ $1 == "a" ]
         then
+            SETUIDP=`ls -la $CURDIR | head -2 | tail -1 | awk '{print $1}' | head -c4 | tail -c1`
+            SETGIDP=`ls -la $CURDIR | head -2 | tail -1 | awk '{print $1}' | head -c7 | tail -c1`
+
             # Grab permissions of user, group and others
-            if [ $sticky == "t" ] || [ $SUGIDCHECK == "s" ] || [ $sticky == "T" ] || [ $SUGIDCHECK == "S" ]
+            if [ $sticky == "t" ] || [ $sticky == "T" ] || [ $SETUIDP == "S" ] ||  [ $SETUIDP == "s" ] || [ $SETGIDP == "S" ] || [ $SETGIDP == "s" ]
             then
                 PERMISSIONS=`getfacl -p $CURDIR | head -7 | tail -3 | awk -F "::" '{print $2}'`
             else
