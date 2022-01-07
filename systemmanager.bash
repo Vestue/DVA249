@@ -53,8 +53,7 @@ _main() {
                 _exit_program
                 ;;
             *)
-                echo “Wrong input: $INPUT. Try again.”
-                _hold
+                _error_print
                 ;;
         esac
     done
@@ -117,8 +116,7 @@ _user() {
                 RUNUSR=0
                 ;;
             *)
-                echo 'Wrong input. Try again.'
-                _hold
+                _error_print
                 ;;
         esac                
     done
@@ -262,8 +260,7 @@ _user_attributes_change() {
             return 2
             ;;
         *)
-            echo 'Invalid option.'
-            _hold
+            _error_print
             ;;
     esac
 }
@@ -335,8 +332,7 @@ _directory() {
                 RUNDIR=0
                 ;;
             *)
-                echo 'Wrong input. Try again'
-                _hold
+                _error_print
                 ;;
         esac
     done
@@ -605,8 +601,7 @@ _directory_modify(){
             RUNDIR=0
             RUNDIRMOD=0
         else
-            echo "Invalid input"
-            _hold
+            _error_print
         fi
     done
 }
@@ -762,8 +757,7 @@ _directory_modify_permissions() {
                         chmod +t $CURDIR
                     fi
                 else
-                    echo 'Invalid input. Try again.'
-                    _hold
+                    _error_print
                 fi
                 ;;
             b)
@@ -776,8 +770,7 @@ _directory_modify_permissions() {
                 RUNPER=0
                 ;;
             *)
-                echo 'Invalid input. Try again.'
-                _hold
+                _error_print
                 ;;
         esac
     done
@@ -885,8 +878,7 @@ _group() {
                 RUNGRP=0
                 ;;
             *)
-                echo “Wrong input. Try again”
-                _hold
+                _error_print
                 ;;
         esac
     done
@@ -978,7 +970,7 @@ _group_modify() {
                 RUNGRPMOD=0
                 ;;
             *)
-                echo "Invalid input. Try again."
+                _error_print
                 ;;
         esac
     done
@@ -1235,6 +1227,10 @@ _exit_program() {
     clear
     echo 'Exiting program… '
     CONTINUE=0
+}
+_error_print() {
+    echo 'Invalid input. Try again.'
+    _hold
 }
 
 # Main is called at the end, causing the order of the functions to not matter.
