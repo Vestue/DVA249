@@ -491,11 +491,11 @@ _directory_view(){
     other=`getfacl -p $CURDIR | egrep "^o" | sed "s/:/ /g" | awk '{print $2}'`
     
     # User permissions
-    echo -en "  ${RED}User ${reset}"
+    echo -en "  ${RED}User   ${reset}"
     _directory_view_permissions $userP
 
     # Group permissions
-    echo -en "  ${BLUE}Group ${reset}"
+    echo -en "  ${BLUE}Group  ${reset}"
     _directory_view_permissions $grpP
 
     # Others permissions
