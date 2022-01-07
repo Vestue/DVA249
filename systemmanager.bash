@@ -1225,7 +1225,7 @@ _choice_custom_multiple() {
 }
 _exit_program() {
     clear
-    echo 'Exiting program… '
+    #echo 'Exiting program… '
     CONTINUE=0
 }
 _error_print() {
