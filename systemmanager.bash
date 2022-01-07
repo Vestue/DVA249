@@ -131,13 +131,13 @@ _user_menu() {
     echo "${RED}d${reset} - User Delete    (Delete a login user)"
 }
 _user_create() {
-    _choice_custom_multiple "full name of user"
-    read FULLNAME
-    
     _choice_custom_multiple "username of user"
     read USERNAME
     # Convert uppercases to lowercases
     USERNAME=`echo $USERNAME | tr '[:upper:]' '[:lower:]' `
+
+    _choice_custom_multiple "full name of user"
+    read FULLNAME
     
     _choice_custom_multiple "password of user"
     read -s PASSWORD
