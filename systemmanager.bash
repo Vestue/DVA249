@@ -1247,6 +1247,7 @@ _choice_custom_multiple() {
     echo -en "Enter $1: "
 }
 _exit_program() {
+    clear
     echo 'Exiting program… '
     CONTINUE=0
 }
