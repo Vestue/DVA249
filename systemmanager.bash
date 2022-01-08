@@ -884,6 +884,7 @@ _group() {
                 ;;
             m)
                 _group_modify
+                _hold
                 ;;
             d)
                 _group_list
@@ -964,7 +965,12 @@ _group_list_users_in_specific_group() {
     then
         # The primary user of the primary group needs to be added
         # to the print of the members of the group.
-        USERS="${NAME},${USERS}"
+        if [ $USERS == " " ]
+        then
+            USERS="${NAME}"
+        else
+            USERS="${NAME},${USERS}"
+        fi
     fi
     echo -e "\nGroup members: $USERS"
 }
