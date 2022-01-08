@@ -965,7 +965,7 @@ _group_list_users_in_specific_group() {
     then
         # The primary user of the primary group needs to be added
         # to the print of the members of the group.
-        if [ $USERS == "" ]
+        if [ $USERS == "\n" ]
         then
             USERS="${NAME}"
         else
