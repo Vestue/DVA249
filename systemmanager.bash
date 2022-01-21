@@ -134,7 +134,7 @@ _user_create() {
     _choice_custom_multiple "username of user"
     read USERNAME
     # Convert uppercases to lowercases
-    USERNAME=`echo $USERNAME | tr '[:upper:]' '[:lower:]' `
+    USERNAME=`echo $USERNAME | tr '[:upper:]' '[:lower:]'`
     # Convert spacing to underscore
     USERNAME=`echo $USERNAME | sed 's/ /_/g'`
 
@@ -178,6 +178,7 @@ _user_list() {
 _user_attributes_list() {
     _user_ask_which
     read USERNAME
+    clear
 
     ATTR=`getent passwd $USERNAME`
     RETVAL=$?
@@ -221,6 +222,11 @@ _user_attributes_change() {
     case $INPUT in
         u)
             _user_ask_changeto
+
+            # Make sure that no uppercases or spacing is included
+            NEWDATA=`echo $NEWDATA | tr '[:upper:]' '[:lower:]'`
+            NEWDATA=`echo $NEWDATA | sed 's/ /_/g'`
+
             usermod -l $NEWDATA $USERNAME
             # Renames the homedirectory so that the user keeps the old files.
             mv /home/$USERNAME /home/$NEWDATA
@@ -918,7 +924,9 @@ _group_create() {
     read NAME
 
     # Convert uppercases to lowercases
-    NAME=`echo $NAME | tr '[:upper:]' '[:lower:]' `
+    NAME=`echo $NAME | tr '[:upper:]' '[:lower:]'`
+    # Convert whitespace to underscore
+    NAME=`echo $NAME | sed 's/ /_/g'`
 
     eval addgroup $NAME &> /dev/null
     RETVAL=$?
@@ -959,14 +967,16 @@ _group_list_users_in_specific_group() {
     USERS=`getent group $NAME | awk -F ":" '{print $4}'`
 
     # Test if the group is a primary group.
-    getent passwd $NAME &> /dev/null
+    getent passwd | grep $NAME: &> /dev/null
     RETVAL=$?
     if [[ $RETVAL -eq 0 ]]
     then
         # The primary user of the primary group needs to be added
         # to the print of the members of the group.
+        NAME=`getent passwd | grep $NAME: | awk -F ":" '{print $1}'`
         USERS="${NAME},${USERS}"
     fi
+    USERS=`echo $USERS | sed 's/.$//'`
     echo -e "\nGroup members: $USERS"
 }
 _group_modify() {
