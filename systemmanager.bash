@@ -306,6 +306,34 @@ _user_remove() {
     else
         echo -e "\nFailed to add user."
     fi
+
+
+    home=`ls /home/$USERNAME 2> /dev/null`
+    RETVAL=$?
+    if [[ $RETVAL -ne 0 ]]
+    then
+        return
+    fi
+
+    RUNUSRREM=1
+    while [[ $RUNUSRREM -eq 1 ]]
+    do
+        echo -e "\nDo you want to delete user directory as well?"
+        echo '[y] - Yes, [n] - No'
+        read -n1 INPUT
+        case $INPUT in
+            y)
+                rm -r /home/$USERNAME
+                RUNUSRREM=0
+                ;;
+            n)
+                RUNUSRREM=0
+                return
+                ;;
+            *)
+                _error_print
+        esac
+    done
 }
 _user_ask_which() {
     _choice_custom_multiple "username"
@@ -1264,7 +1292,7 @@ _exit_program() {
     CONTINUE=0
 }
 _error_print() {
-    echo 'Invalid input. Try again.'
+    echo -e "\nInvalid input. Try again."
     _hold
 }
 
