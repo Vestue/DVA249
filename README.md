@@ -1,4 +1,7 @@
 # TUI System Manager
+![Linux](https://img.shields.io/badge/-Linux-grey?logo=linux)
+![Bash](https://img.shields.io/badge/-Bash-white?logo=gnu-bash)
+
 ## Description
 A TUI designed to help new users of Linux to work with groups, users and directories.
 It does this by giving an easy way to create new ones, remove existing ones, and toggle any permissions upon request.
@@ -11,13 +14,13 @@ The navigating buttons are represented by colorful characters in the terminal.
 
 The buttons are mapped to represent certain words and thus changes depending on current context, but they are not too different as we have tried to standardize as much as possible.
 ### Examples
-* *u*: users
-* *d*: directories
-* *g*: groups
-* *n*: network
+* `u` - *users*
+* `d` - *directories*
+* `g` - *groups*
+* `n` - *network*
 
 We have also provided a way for the user to exit instantly wherever in the program the user is.
-This is done by using: `q`
+* `q` - *quit*
 
 ## Screenshots
 * :construction: Main menu
