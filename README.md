@@ -3,10 +3,10 @@
 ![Bash](https://img.shields.io/badge/-Bash-white?logo=gnu-bash)
 
 ## Description
-A TUI designed to help new users of Linux to work with groups, users and directories.
+A TUI program designed to help new users of Linux to work with groups, users and directories.
 It does this by giving an easy way to create new ones, remove existing ones, and toggle any permissions upon request.
 
-Alough it was designed with new users as the focus, the TUI was also developed with a mindset that an experienced user should be able to use it very fast, and thus would be faster than using the CLI as one normally would.
+Alough it was designed with new users as the focus, the program was also developed with a mindset that an experienced user should be able to use it very fast, and thus would be faster than using the CLI as one normally would.
 
 ## Usage
 Navigation works by pressing a single button, for example `g` which causes the user to move into the group menu.
